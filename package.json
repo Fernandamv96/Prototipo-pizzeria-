@@ -1,0 +1,29 @@
+{
+  "name": "papa-johns-prototipo",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Prototipo en vivo de Papa John's Chile — AURUM. Editorial product photography renderizado en tiempo real con Three.js.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "three.js",
+    "webgl",
+    "3d",
+    "prototype",
+    "editorial",
+    "scroll",
+    "design"
+  ],
+  "author": "AURUM Team",
+  "license": "MIT",
+  "dependencies": {
+    "three": "^0.165.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}

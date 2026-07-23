@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Prototipo en vivo de Papa John's Chile — AURUM. Producto 3D editorial renderizado en tiempo real con Three.js." />
+  <meta name="author" content="AURUM Team" />
+  <meta name="theme-color" content="#035542" />
+  <title>Papa John's · Prototipo AURUM en Vivo</title>
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="/src/css/main.css" />
+</head>
+<body>
+  <canvas id="scene-canvas"></canvas>
+  <div class="paper-grid"></div>
+
+  <nav>
+    <div class="nav-brand">
+      <span class="word">Papa John's</span>
+      <span class="sub">AURUM · Live Prototype</span>
+    </div>
+    <div class="nav-right">
+      <a class="nav-link" href="#hero">Inicio</a>
+      <a class="nav-link" href="#chapter-1">Pizzas</a>
+      <a class="nav-link" href="#footer">Stack</a>
+      <a class="nav-menu" href="#">
+        <span>Menú</span>
+        <div class="nav-burger"><span></span><span></span><span></span></div>
+      </a>
+    </div>
+  </nav>
+
+  <div class="selector" id="selector"></div>
+  <div class="meta">
+    <b>SCROLL</b> · 0% · AURUM
+  </div>
+
+  <main class="scroll-layer">
+    <!-- HERO -->
+    <section class="section hero" id="hero">
+      <div>
+        <div class="hero-eyebrow">
+          <span class="dot"></span>
+          <span>PROTOTIPO EN VIVO · PAPA JOHN'S CHILE → AURUM</span>
+        </div>
+        <h1>
+          <span class="w1 display">PIZZA</span>
+          <span class="w2 display">es silencio</span>
+          <span class="w3 display">en un corte</span>
+        </h1>
+        <p class="hero-sub">
+          Cada pizza es una <strong>escena 3D interactiva</strong> renderizada en tiempo real.
+          Scroll para recorrer el menú. El canvas es blanco — la pizza es la hero.
+        </p>
+        <div class="hero-cta">
+          <a href="#chapter-1" class="btn lg solid">Recorrer el menú <span>→</span></a>
+          <a href="#footer" class="btn lg blue">Ver stack</a>
+        </div>
+      </div>
+      <div class="scroll-hint">SCROLL · DESCUBRE</div>
+    </section>
+
+    <!-- PIZZA CHAPTERS -->
+    <section class="chapter" id="chapter-1" data-pizza="0">
+      <span class="bg-word">PEPPERONI</span>
+      <div class="seal">
+        <div class="seal-text">FEATURED<br /><div class="seal-dot"></div></div>
+      </div>
+      <div class="content">
+        <div class="chapter-tag"><span class="dot"></span><span>PIZZA 01 · CLÁSICA</span></div>
+        <h2 class="chapter-name">Super <em>Pepperoni</em></h2>
+        <p class="chapter-desc">
+          El cuchillo atraviesa lentamente. El pepperoni se desliza con física realista,
+          el borde se curva como en una sola toma de estudio.
+        </p>
+        <div class="chapter-price">PRECIO · <b>$9.990 CLP</b></div>
+        <div style="margin-top:12px">
+          <a class="btn solid" href="#">Ordenar ahora <span>→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="chapter-2" data-pizza="1">
+      <span class="bg-word yellow">FRESH</span>
+      <div class="content">
+        <div class="chapter-tag"><span class="dot"></span><span>PIZZA 02 · ITALIANA</span></div>
+        <h2 class="chapter-name">Napolitana</h2>
+        <p class="chapter-desc">
+          Corte limpio. Vapor sutil. Brillo en el tomate. La simplicidad como declaración editorial.
+        </p>
+        <div class="chapter-price">PRECIO · <b>$8.990 CLP</b></div>
+        <div style="margin-top:12px">
+          <a class="btn" href="#">Ordenar ahora <span>→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="chapter-3" data-pizza="2">
+      <span class="bg-word">BBQ</span>
+      <div class="content">
+        <div class="chapter-tag"><span class="dot"></span><span>PIZZA 03 · AHUMADA</span></div>
+        <h2 class="chapter-name">Pollo <em>BBQ</em></h2>
+        <p class="chapter-desc">
+          El queso se estira como el tiempo. La salsa brilla con roughness animada.
+          El momento exacto antes de morder.
+        </p>
+        <div class="chapter-price">PRECIO · <b>$10.490 CLP</b></div>
+        <div style="margin-top:12px">
+          <a class="btn" href="#">Ordenar ahora <span>→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="chapter-4" data-pizza="3">
+      <span class="bg-word yellow">CAPRESE</span>
+      <div class="content">
+        <div class="chapter-tag"><span class="dot"></span><span>PIZZA 04 · FRESCA</span></div>
+        <h2 class="chapter-name">Pollo <em>Caprese</em></h2>
+        <p class="chapter-desc">
+          Las hojas de albahaca reaccionan con simulación cloth. La pizza respira cuando la cortas.
+        </p>
+        <div class="chapter-price">PRECIO · <b>$10.490 CLP</b></div>
+        <div style="margin-top:12px">
+          <a class="btn" href="#">Ordenar ahora <span>→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="chapter-5" data-pizza="4">
+      <span class="bg-word">WORKS</span>
+      <div class="content">
+        <div class="chapter-tag"><span class="dot"></span><span>PIZZA 05 · XL</span></div>
+        <h2 class="chapter-name">The <em>Works</em></h2>
+        <p class="chapter-desc">
+          Ocho toppings reaccionando en cadena. Stagger dinámico. La pizza más caótica de la casa.
+        </p>
+        <div class="chapter-price">PRECIO · <b>$12.990 CLP</b></div>
+        <div style="margin-top:12px">
+          <a class="btn" href="#">Ordenar ahora <span>→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="chapter-6" data-pizza="5">
+      <span class="bg-word yellow">ANDINA</span>
+      <div class="seal">
+        <div class="seal-text">LOCAL<br /><div class="seal-dot"></div></div>
+      </div>
+      <div class="content">
+        <div class="chapter-tag"><span class="dot"></span><span>PIZZA 06 · EDICIÓN ANDINA</span></div>
+        <h2 class="chapter-name">La <em>Cordillerana</em></h2>
+        <p class="chapter-desc">
+          Polvo andino. Humo frío. La Cordillera de los Andes cae sobre la pizza en partículas que respiran.
+        </p>
+        <div class="chapter-price">PRECIO · <b>$11.490 CLP</b></div>
+        <div style="margin-top:12px">
+          <a class="btn" href="#">Ordenar ahora <span>→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="chapter-7" data-pizza="6">
+      <span class="bg-word teal">VERDE</span>
+      <div class="content">
+        <div class="chapter-tag"><span class="dot"></span><span>PIZZA 07 · VEGETARIANA</span></div>
+        <h2 class="chapter-name">Vegetariana</h2>
+        <p class="chapter-desc">
+          Verduras que rebotan con gracia. Pimientos, champiñones y aceitunas en soft-body damping.
+          La quietud del color.
+        </p>
+        <div class="chapter-price">PRECIO · <b>$9.490 CLP</b></div>
+        <div style="margin-top:12px">
+          <a class="btn" href="#">Ordenar ahora <span>→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer id="footer">
+      <div class="footer-grid">
+        <div>
+          <div class="brand-word">AURUM</div>
+          <div class="brand-sub">Propuesta · 2026</div>
+          <p>
+            Prototipo en vivo de la propuesta de rediseño. Renderizado en tiempo real con
+            Three.js + shaders custom sobre canvas blanco. Forest green como ancla, tipografía
+            Work Sans 900 como arquitectura.
+          </p>
+        </div>
+        <div>
+          <h4>Stack</h4>
+          <ul>
+            <li>Three.js r165+</li>
+            <li>WebGL2 + GLSL</li>
+            <li>Custom shaders</li>
+            <li>InstancedMesh</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Performance</h4>
+          <ul>
+            <li>60fps desktop</li>
+            <li>50–60fps mobile</li>
+            <li>LOD adaptativo</li>
+            <li>Lazy scenes</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Entregable</h4>
+          <ul>
+            <li>Concepto creativo</li>
+            <li>Sistema visual</li>
+            <li>Wireframe + UX</li>
+            <li>Código + shaders</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-credit">© 2026 · AURUM Prototype · Senior team · v0.3</div>
+    </footer>
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

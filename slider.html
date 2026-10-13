@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AURUM · Pizza Slider — Coverflow 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest: #035542;
+    --forest-press: #024235;
+    --billboard-blue: #2b7bb9;
+    --cream-teal: #56dddb;
+    --butter-yellow: #f9e9a9;
+    --charcoal: #333333;
+    --charcoal-soft: #5a5a56;
+    --paper: #ffffff;
+    --paper-off: #fafaf7;
+    --line: #e8e6df;
+    --line-dark: #d4d2cb;
+    --sans: 'Work Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--paper);color:var(--charcoal);font-family:var(--sans);font-weight:400;letter-spacing:-0.0100em;-webkit-font-smoothing:antialiased;line-height:1.45;overflow-x:hidden}
+  body{cursor:default}
+
+  /* ===== NAV ===== */
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:22px 32px;background:var(--paper);border-bottom:1px solid var(--line)}
+  .nav-brand{display:flex;flex-direction:column;line-height:1}
+  .nav-brand .word{font-family:var(--sans);font-style:italic;font-weight:900;font-size:28px;color:var(--forest);letter-spacing:-0.0100em}
+  .nav-brand .sub{font-family:var(--sans);font-weight:500;font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:var(--forest);margin-top:2px}
+  .nav-right{display:flex;align-items:center;gap:24px}
+  .nav-link{font-weight:500;font-size:17px;color:var(--forest);position:relative;cursor:pointer}
+  .nav-link::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:1.5px;background:var(--forest);transform:scaleX(0);transform-origin:right;transition:transform .3s ease}
+  .nav-link:hover::after{transform:scaleX(1);transform-origin:left}
+  .nav-menu{display:flex;align-items:center;gap:12px;font-weight:500;font-size:17px;color:var(--forest);cursor:pointer}
+  .nav-burger{width:24px;height:18px;display:flex;flex-direction:column;justify-content:space-between;padding:3px 0}
+  .nav-burger span{display:block;width:100%;height:3px;background:var(--forest)}
+
+  /* ===== HERO STRIP ===== */
+  .hero-strip{padding:120px 32px 40px;border-bottom:1px solid var(--line)}
+  .hero-strip-inner{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;gap:40px;flex-wrap:wrap}
+  .hero-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--forest);display:flex;align-items:center;gap:10px}
+  .hero-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--forest);display:inline-block}
+  .hero-title{font-family:var(--sans);font-weight:900;font-size:clamp(36px, 5vw, 72px);line-height:0.95;letter-spacing:-0.0100em;color:var(--forest);text-transform:uppercase;flex:1;min-width:300px}
+  .hero-title em{font-style:italic}
+  .hero-meta{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--charcoal-soft);text-align:right;line-height:1.8}
+  .hero-meta b{color:var(--forest);font-weight:500;display:block}
+
+  /* ===== SLIDER STAGE ===== */
+  .slider-stage{position:relative;height:80vh;min-height:640px;overflow:hidden;perspective:1400px;background:linear-gradient(180deg,var(--paper) 0%,var(--paper-off) 100%);user-select:none}
+  .slider-track{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100%;height:100%;display:flex;align-items:center;justify-content:center;transform-style:preserve-3d}
+  .slider-track.dragging{cursor:grabbing}
+
+  /* ===== CARD ===== */
+  .pizza-card{position:absolute;width:420px;height:560px;border:1.5px solid var(--line);background:var(--paper);border-radius:8px;transition:transform .6s cubic-bezier(.2,.8,.2,1),opacity .6s ease,filter .6s ease;cursor:grab;overflow:hidden;display:flex;flex-direction:column;will-change:transform}
+  .pizza-card.dragging{cursor:grabbing;transition:none}
+  .pizza-card .card-num{position:absolute;top:18px;left:18px;font-family:var(--mono);font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--charcoal-soft);z-index:3}
+  .pizza-card .card-num b{color:var(--forest);font-weight:500}
+  .pizza-card .card-tag{position:absolute;top:18px;right:18px;font-family:var(--sans);font-weight:500;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--forest);padding:6px 12px;border:1.5px solid var(--forest);border-radius:100px;z-index:3;background:var(--paper)}
+  .pizza-card .card-3d{position:absolute;inset:0;z-index:1}
+  .pizza-card .card-3d canvas{width:100%!important;height:100%!important;display:block}
+  .pizza-card .card-shade{position:absolute;left:0;right:0;bottom:0;height:60%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.0) 30%,rgba(255,255,255,0.85) 70%,var(--paper) 100%);z-index:2;pointer-events:none}
+  .pizza-card .card-content{position:absolute;left:0;right:0;bottom:0;padding:30px 30px 32px;z-index:3;display:flex;flex-direction:column;gap:8px;background:linear-gradient(180deg,transparent 0%,var(--paper) 30%)}
+  .pizza-card .card-name{font-family:var(--sans);font-weight:900;font-size:38px;line-height:0.95;letter-spacing:-0.0100em;color:var(--forest);text-transform:uppercase}
+  .pizza-card .card-name em{font-style:italic}
+  .pizza-card .card-desc{font-size:14px;line-height:1.5;color:var(--charcoal-soft);max-width:340px;min-height:42px}
+  .pizza-card .card-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+  .pizza-card .card-price{font-family:var(--mono);font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:var(--charcoal-soft)}
+  .pizza-card .card-price b{color:var(--forest);font-weight:500;font-size:15px}
+  .pizza-card .card-cta{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;font-family:var(--sans);font-weight:500;font-size:15px;color:var(--paper);background:var(--forest);border:1.5px solid var(--forest);border-radius:20px;cursor:pointer;transition:all .25s ease;letter-spacing:-0.0100em}
+  .pizza-card .card-cta:hover{background:var(--forest-press);border-color:var(--forest-press)}
+  .pizza-card .card-cta::after{content:"→";font-family:var(--sans);font-weight:400}
+
+  /* Card states based on distance from center */
+  .pizza-card.is-center{z-index:5}
+  .pizza-card.is-near{z-index:4}
+  .pizza-card.is-far{z-index:3}
+  .pizza-card.is-hidden{z-index:1}
+
+  /* ===== CONTROLS ===== */
+  .slider-controls{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:20px;z-index:20;background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);padding:10px 18px;border:1px solid var(--line);border-radius:100px}
+  .ctrl-btn{width:38px;height:38px;border:1.5px solid var(--forest);background:var(--paper);border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:all .2s ease;color:var(--forest);font-family:var(--sans);font-size:16px;font-weight:700}
+  .ctrl-btn:hover{background:var(--forest);color:var(--paper)}
+  .ctrl-btn:disabled{opacity:0.3;cursor:not-allowed}
+  .ctrl-btn:disabled:hover{background:var(--paper);color:var(--forest)}
+  .progress-track{width:200px;height:2px;background:var(--line-dark);position:relative;border-radius:2px;overflow:hidden}
+  .progress-fill{position:absolute;left:0;top:0;height:100%;background:var(--forest);transition:width .5s cubic-bezier(.2,.8,.2,1);border-radius:2px}
+  .ctrl-counter{font-family:var(--mono);font-size:12px;letter-spacing:0.15em;color:var(--charcoal);min-width:60px;text-align:center;text-transform:uppercase}
+  .ctrl-counter b{color:var(--forest);font-weight:500}
+
+  /* Side arrows */
+  .side-arrow{position:absolute;top:50%;transform:translateY(-50%);width:56px;height:56px;border:1.5px solid var(--forest);background:rgba(255,255,255,0.9);backdrop-filter:blur(10px);border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:all .25s ease;z-index:15;color:var(--forest);font-family:var(--sans);font-size:20px;font-weight:400}
+  .side-arrow:hover{background:var(--forest);color:var(--paper);transform:translateY(-50%) scale(1.05)}
+  .side-arrow.prev{left:32px}
+  .side-arrow.next{right:32px}
+  .side-arrow:disabled{opacity:0.3;cursor:not-allowed;transform:translateY(-50%)}
+  .side-arrow:disabled:hover{background:rgba(255,255,255,0.9);color:var(--forest);transform:translateY(-50%)}
+
+  /* ===== INFO STRIP ===== */
+  .info-strip{padding:80px 32px;border-top:1px solid var(--line);background:var(--paper)}
+  .info-strip-inner{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;align-items:start}
+  .info-title{font-family:var(--sans);font-weight:900;font-size:32px;line-height:0.95;letter-spacing:-0.0100em;color:var(--forest);text-transform:uppercase;margin-bottom:20px}
+  .info-title em{font-style:italic}
+  .info-text{font-size:15px;line-height:1.55;color:var(--charcoal-soft);max-width:480px}
+  .info-list h4{font-family:var(--mono);font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--forest);margin-bottom:16px;font-weight:500}
+  .info-list ul{list-style:none;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--charcoal)}
+  .info-list li{display:flex;align-items:flex-start;gap:8px}
+  .info-list li::before{content:"·";color:var(--forest);font-weight:700;margin-top:-2px}
+
+  /* ===== FOOTER ===== */
+  footer{padding:30px 32px;border-top:1px solid var(--line);background:var(--paper)}
+  .footer-inner{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--charcoal-soft)}
+  .footer-inner b{color:var(--forest);font-weight:500}
+
+  /* ===== RESPONSIVE ===== */
+  @media(max-width:1100px){
+    .pizza-card{width:380px;height:520px}
+  }
+  @media(max-width:900px){
+    nav{padding:18px 20px}
+    .nav-right .nav-link{display:none}
+    .hero-strip{padding:100px 20px 30px}
+    .slider-stage{height:75vh;min-height:560px}
+    .pizza-card{width:300px;height:440px}
+    .pizza-card .card-name{font-size:28px}
+    .pizza-card .card-content{padding:20px 22px 24px}
+    .side-arrow{width:44px;height:44px;font-size:16px}
+    .side-arrow.prev{left:14px}
+    .side-arrow.next{right:14px}
+    .progress-track{width:120px}
+    .info-strip-inner{grid-template-columns:1fr;gap:30px}
+    .info-title{font-size:24px}
+  }
+  @media(max-width:600px){
+    .pizza-card{width:260px;height:400px}
+    .pizza-card .card-name{font-size:24px}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <span class="word">Papa John's</span>
+    <span class="sub">AURUM · Pizza Slider · 2026</span>
+  </div>
+  <div class="nav-right">
+    <a class="nav-link" href="#info">Cómo funciona</a>
+    <a class="nav-link" href="#info">Stack</a>
+    <a class="nav-menu">
+      <span>Menú</span>
+      <div class="nav-burger"><span></span><span></span><span></span></div>
+    </a>
+  </div>
+</nav>
+
+<!-- HERO STRIP -->
+<section class="hero-strip">
+  <div class="hero-strip-inner">
+    <div>
+      <div class="hero-eyebrow">
+        <span class="dot"></span>
+        <span>PIZZA SLIDER · COVERFLOW 3D · DRAG TO EXPLORE</span>
+      </div>
+    </div>
+    <h1 class="hero-title">Elige <em>tu</em><br>pizza.</h1>
+    <div class="hero-meta">
+      <b>7 PIZZAS</b>
+      <span>Drag · Snap · Touch</span>
+      <span>Three.js · 60fps</span>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDER STAGE -->
+<div class="slider-stage" id="stage">
+  <div class="slider-track" id="track"></div>
+
+  <button class="side-arrow prev" id="prev" aria-label="Anterior">‹</button>
+  <button class="side-arrow next" id="next" aria-label="Siguiente">›</button>
+
+  <div class="slider-controls">
+    <button class="ctrl-btn" id="playPause" aria-label="Auto-rotar">▶</button>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="ctrl-counter"><b id="cur">01</b> / 07</div>
+  </div>
+</div>
+
+<!-- INFO STRIP -->
+<section class="info-strip" id="info">
+  <div class="info-strip-inner">
+    <div>
+      <h2 class="info-title">Coverflow <em>3D</em><br>con snap.</h2>
+      <p class="info-text">Cada pizza es una <strong style="color:var(--forest)">escena 3D independiente</strong> renderizada con Three.js. El slider aplica una transformación perspective a cada card según su distancia al centro, creando el efecto coverflow clásico. Drag con mouse o swipe con touch — el momentum es natural, el snap es preciso.</p>
+    </div>
+    <div class="info-list">
+      <h4>Interacción</h4>
+      <ul>
+        <li>Drag horizontal con momentum</li>
+        <li>Snap por card (centrada)</li>
+        <li>Touch + mouse unificados</li>
+        <li>Auto-rotate con pausa on hover</li>
+        <li>Teclado: ← →</li>
+      </ul>
+    </div>
+    <div class="info-list">
+      <h4>Visual</h4>
+      <ul>
+        <li>Perspective 1400px</li>
+        <li>3D pizza por card</li>
+        <li>Work Sans 900 headlines</li>
+        <li>Forest green UI</li>
+        <li>High-key product lighting</li>
+      </ul>
+    </div>
+    <div class="info-list">
+      <h4>Stack</h4>
+      <ul>
+        <li>Three.js · WebGL2</li>
+        <li>Vanilla JS · No deps</li>
+        <li>CSS transform 3D</li>
+        <li>Pointer events unificados</li>
+        <li>LOD adaptativo mobile</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <span><b>AURUM</b> · Pizza Slider · Coverflow 3D Component</span>
+    <span>v0.4 · 22 JUL 2026</span>
+  </div>
+</footer>
+
+<!-- Three.js from CDN -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.165.0/build/three.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// =============================================================
+// AURUM — Pizza Coverflow Slider
+// 7 cards, perspective transform, drag + snap, Three.js per card
+// =============================================================
+
+// ---- Pizza data ----
+const PIZZAS = [
+  { id: 1, name: 'Super', nameEm: 'Pepperoni', desc: 'Carne · Cuchillo · Tiempo. El clásico que nunca falla, animado en 3D.', price: '9.990', tag: 'CLÁSICA', color: 0x8b2a1a, dough: 0xd4986a, sauce: 0x8b2a1a, toppings: [{ count: 22, color: 0x8b2a1a, size: 0.07, roughness: 0.5 }] },
+  { id: 2, name: 'Napo', nameEm: 'litana', desc: 'Corte limpio, vapor sutil, brillo en el tomate. Italiana como debe ser.', price: '8.990', tag: 'ITALIANA', color: 0xc4322a, dough: 0xd4a06a, sauce: 0xc4322a, toppings: [{ count: 10, color: 0xc4322a, size: 0.08, shape: 'flat', roughness: 0.4 }, { count: 8, color: 0x2d5a2a, size: 0.04, roughness: 0.7 }] },
+  { id: 3, name: 'Pollo', nameEm: 'BBQ', desc: 'El queso se estira como el tiempo. Brillo especular sobre la salsa.', price: '10.490', tag: 'AHUMADA', color: 0x6b3410, dough: 0xb88040, sauce: 0x6b3410, toppings: [{ count: 16, color: 0x6b3410, size: 0.06, roughness: 0.7 }, { count: 12, color: 0xe8d4a0, size: 0.03, shape: 'flat' }] },
+  { id: 4, name: 'Pollo', nameEm: 'Caprese', desc: 'Albahaca que reacciona con cloth solver. La pizza que respira al cortar.', price: '10.490', tag: 'FRESCA', color: 0x2d5a2a, dough: 0xc8b878, sauce: 0xc4322a, toppings: [{ count: 12, color: 0x6b3410, size: 0.05, roughness: 0.6 }, { count: 6, color: 0xc4322a, size: 0.07, shape: 'flat' }, { count: 14, color: 0x2d5a2a, size: 0.04, roughness: 0.8 }] },
+  { id: 5, name: 'The', nameEm: 'Works', desc: 'Ocho toppings reaccionando en cadena. La pizza más caótica de la casa.', price: '12.990', tag: 'XL', color: 0x8b2a1a, dough: 0xc89860, sauce: 0x8b1a10, toppings: [{ count: 14, color: 0x8b2a1a, size: 0.06 }, { count: 10, color: 0x5a2818, size: 0.05 }, { count: 12, color: 0xc9b890, size: 0.05 }, { count: 20, color: 0x1a1a1a, size: 0.035, roughness: 0.4 }] },
+  { id: 6, name: 'La', nameEm: 'Cordillerana', desc: 'Polvo andino. Humo frío. Una pizza que cuenta un lugar.', price: '11.490', tag: 'LOCAL', color: 0x4a1a10, dough: 0xb89870, sauce: 0x4a1a10, toppings: [{ count: 12, color: 0x4a1a10, size: 0.05, roughness: 0.6 }, { count: 10, color: 0xd4b890, size: 0.035, shape: 'flat' }] },
+  { id: 7, name: 'Vege', nameEm: 'tariana', desc: 'Verduras con rebote suave. Pimientos, champiñones y aceitunas.', price: '9.490', tag: 'VERDE', color: 0x2a5a2a, dough: 0xc8b878, sauce: 0x8b1a10, toppings: [{ count: 16, color: 0xc9b890, size: 0.05, roughness: 0.6 }, { count: 14, color: 0x2a5a2a, size: 0.05, shape: 'flat' }, { count: 22, color: 0x1a1a1a, size: 0.035 }] },
+];
+
+// ---- Three.js factory for one pizza (used inside each card) ----
+function makePizzaScene(pizza) {
+  const container = document.createElement('div')
+  container.className = 'card-3d'
+  const canvas = document.createElement('canvas')
+  container.appendChild(canvas)
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
+  renderer.setClearColor(0x000000, 0)
+
+  const scene = new THREE.Scene()
+  const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50)
+  camera.position.set(0, 1.0, 2.6)
+  camera.lookAt(0, 0, 0)
+
+  // Lighting — high-key product photography
+  const ambient = new THREE.AmbientLight(0xffffff, 0.6)
+  scene.add(ambient)
+  const key = new THREE.SpotLight(0xffffff, 3, 10, Math.PI / 5, 0.5)
+  key.position.set(2, 3, 2)
+  scene.add(key)
+  const fill = new THREE.DirectionalLight(0xffffff, 1)
+  fill.position.set(-2, 2, 1)
+  scene.add(fill)
+  const back = new THREE.PointLight(0xffffff, 0.8, 6)
+  back.position.set(0, 1, -2)
+  scene.add(back)
+
+  // Pizza
+  const group = new THREE.Group()
+
+  // Dough
+  const doughGeo = new THREE.CylinderGeometry(1.0, 1.0, 0.06, 64)
+  const doughMat = new THREE.MeshStandardMaterial({ color: pizza.dough, roughness: 0.75, metalness: 0 })
+  const dough = new THREE.Mesh(doughGeo, doughMat)
+  group.add(dough)
+
+  // Crust
+  const crustGeo = new THREE.TorusGeometry(1.0, 0.05, 16, 64)
+  const crustMat = new THREE.MeshStandardMaterial({ color: pizza.dough * 0.85, roughness: 0.9 })
+  const crust = new THREE.Mesh(crustGeo, crustMat)
+  crust.rotation.x = Math.PI / 2
+  crust.position.y = 0.03
+  group.add(crust)
+
+  // Sauce
+  const sauceGeo = new THREE.CircleGeometry(0.9, 64)
+  const sauceMat = new THREE.MeshStandardMaterial({ color: pizza.sauce, roughness: 0.5 })
+  const sauce = new THREE.Mesh(sauceGeo, sauceMat)
+  sauce.rotation.x = -Math.PI / 2
+  sauce.position.y = 0.031
+  group.add(sauce)
+
+  // Cheese
+  const cheeseGeo = new THREE.CircleGeometry(0.88, 64)
+  const cheeseMat = new THREE.MeshStandardMaterial({ color: 0xf5e8c0, roughness: 0.4, metalness: 0.05 })
+  const cheese = new THREE.Mesh(cheeseGeo, cheeseMat)
+  cheese.rotation.x = -Math.PI / 2
+  cheese.position.y = 0.045
+  group.add(cheese)
+
+  // Toppings (instanced)
+  pizza.toppings.forEach(t => {
+    const tGeo = new THREE.SphereGeometry(t.size || 0.04, 12, 8)
+    if (t.shape === 'flat') tGeo.scale(1, 0.3, 1)
+    const tMat = new THREE.MeshStandardMaterial({ color: new THREE.Color(t.color), roughness: t.roughness ?? 0.6, metalness: 0.05 })
+    const inst = new THREE.InstancedMesh(tGeo, tMat, t.count)
+    const dummy = new THREE.Object3D()
+    let seed = t.count * 7919
+    const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+    for (let i = 0; i < t.count; i++) {
+      const angle = rand() * Math.PI * 2
+      const r = Math.sqrt(rand()) * 0.78
+      dummy.position.set(Math.cos(angle) * r, 0.08 + (t.size || 0.04) * 0.5, Math.sin(angle) * r)
+      dummy.rotation.set(0, rand() * Math.PI * 2, 0)
+      const s = 0.8 + rand() * 0.4
+      dummy.scale.set(s, s, s)
+      dummy.updateMatrix()
+      inst.setMatrixAt(i, dummy.matrix)
+    }
+    inst.instanceMatrix.needsUpdate = true
+    group.add(inst)
+  })
+
+  scene.add(group)
+
+  // Resize handler for this card's canvas
+  function resize() {
+    const w = container.clientWidth
+    const h = container.clientHeight
+    renderer.setSize(w, h, false)
+    camera.aspect = w / h
+    camera.updateProjectionMatrix()
+  }
+  resize()
+  const ro = new ResizeObserver(resize)
+  ro.observe(container)
+
+  return { renderer, scene, camera, group, canvas, container, ro }
+}
+
+// ---- Build cards ----
+const track = document.getElementById('track')
+const cards = []
+let activeIndex = 0
+let offset = 0 // current scroll offset in pixels
+let targetOffset = 0
+let velocity = 0
+let isDragging = false
+let startX = 0
+let startOffset = 0
+let lastDragTime = 0
+let autoRotate = null
+let isAutoPaused = false
+
+const CARD_GAP = 480 // horizontal distance between cards when stacked
+const MAX_OFFSET = (PIZZAS.length - 1) * CARD_GAP
+
+PIZZAS.forEach((pizza, i) => {
+  const card = document.createElement('div')
+  card.className = 'pizza-card'
+  card.dataset.index = i
+  card.innerHTML = `
+    <div class="card-num"><b>${String(i + 1).padStart(2, '0')}</b> / ${String(PIZZAS.length).padStart(2, '0')}</div>
+    <div class="card-tag">${pizza.tag}</div>
+    <div class="card-shade"></div>
+    <div class="card-content">
+      <div class="card-name">${pizza.name} <em>${pizza.nameEm}</em></div>
+      <div class="card-desc">${pizza.desc}</div>
+      <div class="card-bottom">
+        <div class="card-price">CLP · <b>$${pizza.price}</b></div>
+        <button class="card-cta">Ordenar</button>
+      </div>
+    </div>
+  `
+
+  const pizza3d = makePizzaScene(pizza)
+  // Insert canvas before the shade
+  card.insertBefore(pizza3d.container, card.querySelector('.card-shade'))
+  track.appendChild(card)
+  cards.push({ el: card, pizza3d, ...pizza })
+})
+
+// ---- Render each card's 3D scene continuously ----
+const clock = new THREE.Clock()
+function renderCards() {
+  const t = clock.getElapsedTime()
+  const dt = clock.getDelta()
+
+  cards.forEach((card, i) => {
+    if (!card.pizza3d) return
+    // Slow rotation, faster when active
+    const speedBoost = i === activeIndex ? 1.6 : 0.6
+    card.pizza3d.group.rotation.y += dt * 0.25 * speedBoost
+    // Subtle hover float
+    card.pizza3d.group.position.y = Math.sin(t * 0.8 + i * 0.4) * 0.04
+    card.pizza3d.renderer.render(card.pizza3d.scene, card.pizza3d.camera)
+  })
+
+  requestAnimationFrame(renderCards)
+}
+renderCards()
+
+// ---- Slider layout — apply 3D transforms based on offset ----
+function updateLayout() {
+  cards.forEach((card, i) => {
+    const cardOffset = i * CARD_GAP
+    const distance = cardOffset - offset
+    const absDist = Math.abs(distance)
+
+    // Center is at offset = i * CARD_GAP
+    let xTranslate, zTranslate, yRotate, scale, opacity, blur
+
+    if (absDist < 50) {
+      // CENTER
+      xTranslate = 0
+      zTranslate = 0
+      yRotate = 0
+      scale = 1
+      opacity = 1
+      blur = 0
+      card.el.classList.add('is-center')
+      card.el.classList.remove('is-near', 'is-far', 'is-hidden')
+    } else if (absDist < CARD_GAP * 0.6) {
+      // NEAR — slight perspective
+      const sign = distance > 0 ? 1 : -1
+      const norm = absDist / (CARD_GAP * 0.6)
+      xTranslate = sign * (180 + norm * 280)
+      zTranslate = -norm * 250
+      yRotate = -sign * (15 + norm * 20)
+      scale = 0.9 - norm * 0.12
+      opacity = 1 - norm * 0.25
+      blur = 0
+      card.el.classList.add('is-near')
+      card.el.classList.remove('is-center', 'is-far', 'is-hidden')
+    } else if (absDist < CARD_GAP * 1.3) {
+      // FAR — strong perspective
+      const sign = distance > 0 ? 1 : -1
+      const norm = (absDist - CARD_GAP * 0.6) / (CARD_GAP * 0.7)
+      xTranslate = sign * (460 + norm * 240)
+      zTranslate = -250 - norm * 300
+      yRotate = -sign * (35 + norm * 25)
+      scale = 0.78 - norm * 0.1
+      opacity = 0.75 - norm * 0.4
+      blur = norm * 2
+      card.el.classList.add('is-far')
+      card.el.classList.remove('is-center', 'is-near', 'is-hidden')
+    } else {
+      // HIDDEN
+      const sign = distance > 0 ? 1 : -1
+      xTranslate = sign * 800
+      zTranslate = -600
+      yRotate = -sign * 65
+      scale = 0.65
+      opacity = 0
+      blur = 4
+      card.el.classList.add('is-hidden')
+      card.el.classList.remove('is-center', 'is-near', 'is-far')
+    }
+
+    card.el.style.transform = `translateX(${xTranslate}px) translateZ(${zTranslate}px) rotateY(${yRotate}deg) scale(${scale})`
+    card.el.style.opacity = opacity
+    card.el.style.filter = `blur(${blur}px)`
+    card.el.style.zIndex = Math.round(100 - absDist)
+  })
+
+  // Update active index based on closest card
+  const newActive = Math.round(offset / CARD_GAP)
+  if (newActive !== activeIndex && newActive >= 0 && newActive < PIZZAS.length) {
+    activeIndex = newActive
+    onActiveChange(activeIndex)
+  }
+
+  // Update progress bar + counter
+  const progress = (offset / MAX_OFFSET) * 100
+  document.getElementById('progress').style.width = `${progress}%`
+  document.getElementById('cur').textContent = String(activeIndex + 1).padStart(2, '0')
+
+  // Update arrow disabled state
+  document.getElementById('prev').disabled = activeIndex === 0
+  document.getElementById('next').disabled = activeIndex === PIZZAS.length - 1
+}
+
+function onActiveChange(idx) {
+  // Could dispatch event, load lazy assets, etc.
+  console.log(`%cActive pizza: ${PIZZAS[idx].name} ${PIZZAS[idx].nameEm}`, 'font: 12px monospace; color: #035542;')
+}
+
+// ---- Animation loop with inertia + snap ----
+function animateSlider() {
+  if (!isDragging) {
+    // Apply velocity (momentum) with friction
+    if (Math.abs(velocity) > 0.5) {
+      offset += velocity * 0.016
+      velocity *= 0.92 // friction
+    } else {
+      // Snap to nearest card
+      const target = Math.round(offset / CARD_GAP) * CARD_GAP
+      const diff = target - offset
+      offset += diff * 0.12 // smooth snap
+    }
+
+    // Clamp
+    if (offset < 0) { offset = 0; velocity = 0 }
+    if (offset > MAX_OFFSET) { offset = MAX_OFFSET; velocity = 0 }
+  }
+
+  updateLayout()
+  requestAnimationFrame(animateSlider)
+}
+animateSlider()
+
+// ---- Drag interaction (mouse + touch unified) ----
+const stage = document.getElementById('stage')
+
+function getX(e) {
+  if (e.touches && e.touches[0]) return e.touches[0].clientX
+  if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0].clientX
+  return e.clientX
+}
+
+function onDragStart(e) {
+  if (e.target.closest('.card-cta')) return // don't drag when clicking CTA
+  isDragging = true
+  isAutoPaused = true
+  startX = getX(e)
+  startOffset = offset
+  lastDragTime = performance.now()
+  velocity = 0
+  track.classList.add('dragging')
+  cards.forEach(c => c.el.classList.add('dragging'))
+  e.preventDefault()
+}
+
+function onDragMove(e) {
+  if (!isDragging) return
+  const x = getX(e)
+  const dx = x - startX
+  const now = performance.now()
+  const dt = now - lastDragTime
+  if (dt > 0) {
+    velocity = (dx / dt) * 16 // convert to per-frame velocity
+  }
+  offset = startOffset - dx
+  lastDragTime = now
+  e.preventDefault()
+}
+
+function onDragEnd() {
+  if (!isDragging) return
+  isDragging = false
+  track.classList.remove('dragging')
+  cards.forEach(c => c.el.classList.remove('dragging'))
+  // Auto-pause resume after 2s
+  setTimeout(() => { isAutoPaused = false }, 2000)
+}
+
+// Mouse events
+stage.addEventListener('mousedown', onDragStart)
+window.addEventListener('mousemove', onDragMove)
+window.addEventListener('mouseup', onDragEnd)
+
+// Touch events
+stage.addEventListener('touchstart', onDragStart, { passive: false })
+window.addEventListener('touchmove', onDragMove, { passive: false })
+window.addEventListener('touchend', onDragEnd)
+
+// ---- Keyboard ----
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft') { goTo(activeIndex - 1); isAutoPaused = true; setTimeout(() => isAutoPaused = false, 3000) }
+  if (e.key === 'ArrowRight') { goTo(activeIndex + 1); isAutoPaused = true; setTimeout(() => isAutoPaused = false, 3000) }
+})
+
+// ---- Buttons ----
+document.getElementById('prev').addEventListener('click', () => { goTo(activeIndex - 1); isAutoPaused = true; setTimeout(() => isAutoPaused = false, 3000) })
+document.getElementById('next').addEventListener('click', () => { goTo(activeIndex + 1); isAutoPaused = true; setTimeout(() => isAutoPaused = false, 3000) })
+
+function goTo(idx) {
+  if (idx < 0 || idx >= PIZZAS.length) return
+  // Animate offset to target
+  const target = idx * CARD_GAP
+  const start = offset
+  const dist = target - start
+  const duration = 600
+  const startTime = performance.now()
+  function step(now) {
+    const t = Math.min(1, (now - startTime) / duration)
+    const eased = 1 - Math.pow(1 - t, 3) // easeOutCubic
+    offset = start + dist * eased
+    if (t < 1) requestAnimationFrame(step)
+  }
+  step(performance.now())
+}
+
+// ---- Auto-rotate ----
+const playPauseBtn = document.getElementById('playPause')
+playPauseBtn.addEventListener('click', () => {
+  if (autoRotate) {
+    clearInterval(autoRotate)
+    autoRotate = null
+    playPauseBtn.textContent = '▶'
+  } else {
+    autoRotate = setInterval(() => {
+      if (isAutoPaused) return
+      const next = (activeIndex + 1) % PIZZAS.length
+      goTo(next)
+    }, 4000)
+    playPauseBtn.textContent = '❚❚'
+  }
+})
+
+// Initial layout
+updateLayout()
+onActiveChange(0)
+
+console.log('%cAURUM · Pizza Slider', 'font: 18px sans-serif; font-weight: 900; color: #035542;')
+console.log('%cCoverflow 3D · Drag · Snap · 7 pizzas · Three.js', 'font: 11px monospace; color: #2b7bb9;')
+console.log('%cTry: drag horizontally · arrow keys · ◀ ▶ · auto-rotate', 'font: 11px monospace; color: #5a5a56;')
+</script>
+
+</body>
+</html>

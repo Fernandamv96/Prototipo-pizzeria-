@@ -1,232 +1,1353 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Prototipo en vivo de Papa John's Chile — AURUM. Producto 3D editorial renderizado en tiempo real con Three.js." />
-  <meta name="author" content="AURUM Team" />
-  <meta name="theme-color" content="#035542" />
-  <title>Papa John's · Prototipo AURUM en Vivo</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AURUM — Papa John's · Propuesta de Rediseño</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* === COLORS — Hartzler-inspired heritage === */
+    --forest: #035542;          /* ancla · bordes, links, logo */
+    --forest-press: #024235;
+    --billboard-blue: #2b7bb9;  /* links secundarios */
+    --cream-teal: #56dddb;      /* display type · categorías frías */
+    --butter-yellow: #f9e9a9;   /* display type · frescura */
+    --charcoal: #333333;        /* texto principal */
+    --charcoal-light: #5a5a56;
+    --ink-paper: #1a1a1a;       /* texto bold en forest */
+    --paper: #ffffff;           /* canvas */
+    --paper-off: #fafaf7;       /* off-white sutil */
+    --line: #e8e6df;            /* divider lines */
+    --line-dark: #d4d2cb;
+    --line-forest: rgba(3,85,66,0.25);
 
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap"
-    rel="stylesheet"
-  />
+    /* === TYPOGRAPHY — Work Sans single family === */
+    --sans: 'Work Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
 
-  <link rel="stylesheet" href="/src/css/main.css" />
+    /* === SPACING === */
+    --sp-10: 10px; --sp-12: 12px; --sp-15: 15px; --sp-20: 20px;
+    --sp-24: 24px; --sp-30: 30px; --sp-50: 50px; --sp-80: 80px;
+
+    /* === RADIUS === */
+    --r-body: 4px; --r-btn: 20px; --r-pill: 100px; --r-tag: 0;
+
+    /* === TRACKING === */
+    --trk: -0.0100em;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--paper);color:var(--charcoal);font-family:var(--sans);font-weight:400;letter-spacing:var(--trk);-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision;scroll-behavior:smooth}
+  body{overflow-x:hidden;cursor:default;line-height:1.45}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;border:none;background:none;color:inherit;cursor:pointer;letter-spacing:var(--trk)}
+  ::selection{background:var(--butter-yellow);color:var(--forest)}
+
+  /* =========================================================
+     TYPOGRAPHY
+     ========================================================= */
+  .display{font-family:var(--sans);font-weight:900;line-height:0.7;letter-spacing:var(--trk);font-size:clamp(140px, 22vw, 333px);color:var(--cream-teal);text-transform:uppercase}
+  .display.yellow{color:var(--butter-yellow)}
+  .display.forest{color:var(--forest)}
+  .display.xl{font-size:clamp(180px, 28vw, 420px)}
+
+  .h-sub{font-family:var(--sans);font-weight:500;font-size:clamp(28px, 3.5vw, 40px);line-height:1.06;letter-spacing:var(--trk);color:var(--charcoal)}
+  .h-section{font-family:var(--sans);font-weight:900;font-size:clamp(48px, 6vw, 90px);line-height:0.85;letter-spacing:var(--trk);color:var(--forest);text-transform:uppercase}
+
+  .body-l{font-size:18px;line-height:1.45;letter-spacing:var(--trk);color:var(--charcoal)}
+  .body-m{font-size:15px;line-height:1.5;letter-spacing:var(--trk);color:var(--charcoal)}
+  .body-s{font-size:14px;line-height:1.5;letter-spacing:var(--trk);color:var(--charcoal-light)}
+
+  .tag{font-family:var(--sans);font-weight:500;font-size:14px;line-height:1;letter-spacing:var(--trk);text-transform:uppercase;color:var(--forest)}
+  .tag-charcoal{color:var(--charcoal)}
+  .mono{font-family:var(--mono);font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:var(--charcoal-light)}
+
+  /* =========================================================
+     LAYOUT
+     ========================================================= */
+  .container{max-width:1400px;margin:0 auto;padding:0 var(--sp-30)}
+  section{padding:var(--sp-80) 0;position:relative}
+  .full-bleed{padding-left:0;padding-right:0}
+
+  /* =========================================================
+     NAV — minimal floating
+     ========================================================= */
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:24px var(--sp-30);background:var(--paper);border-bottom:1px solid var(--line)}
+  .nav-brand{display:flex;flex-direction:column;line-height:1}
+  .nav-brand .word{font-family:var(--sans);font-style:italic;font-weight:900;font-size:30px;color:var(--forest);letter-spacing:var(--trk)}
+  .nav-brand .sub{font-family:var(--sans);font-weight:500;font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:var(--forest);margin-top:2px}
+  .nav-right{display:flex;align-items:center;gap:24px}
+  .nav-link{font-weight:500;font-size:17px;color:var(--forest);position:relative}
+  .nav-link::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:1.5px;background:var(--forest);transform:scaleX(0);transform-origin:right;transition:transform .3s ease}
+  .nav-link:hover::after{transform:scaleX(1);transform-origin:left}
+  .nav-menu{display:flex;align-items:center;gap:12px;font-weight:500;font-size:17px;color:var(--forest);cursor:pointer}
+  .nav-burger{width:24px;height:18px;display:flex;flex-direction:column;justify-content:space-between;padding:3px 0}
+  .nav-burger span{display:block;width:100%;height:3px;background:var(--forest)}
+
+  /* =========================================================
+     BUTTONS — outlined
+     ========================================================= */
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:12px 24px;font-family:var(--sans);font-weight:500;font-size:17px;line-height:1;letter-spacing:var(--trk);background:transparent;color:var(--forest);border:1.5px solid var(--forest);border-radius:var(--r-btn);transition:all .25s ease;text-transform:none;cursor:pointer}
+  .btn:hover{background:var(--forest);color:var(--paper)}
+  .btn.lg{padding:16px 32px;font-size:18px}
+  .btn.blue{color:var(--billboard-blue);border-color:var(--billboard-blue)}
+  .btn.blue:hover{background:var(--billboard-blue);color:var(--paper)}
+  .btn.solid{background:var(--forest);color:var(--paper)}
+  .btn.solid:hover{background:var(--forest-press);border-color:var(--forest-press)}
+  .pill{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;font-family:var(--sans);font-weight:500;font-size:15px;line-height:1;letter-spacing:var(--trk);background:transparent;color:var(--forest);border:1.5px solid var(--forest);border-radius:var(--r-pill);transition:all .25s ease;cursor:pointer}
+  .pill:hover{background:var(--forest);color:var(--paper)}
+  .pill.solid{background:var(--forest);color:var(--paper)}
+  .pill.solid:hover{background:var(--forest-press);border-color:var(--forest-press)}
+
+  /* =========================================================
+     FEATURED SEAL
+     ========================================================= */
+  .seal{width:120px;height:120px;border:2px solid var(--forest);border-radius:50%;background:var(--paper);display:grid;place-items:center;position:relative;flex-shrink:0}
+  .seal-text{font-family:var(--sans);font-weight:500;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--forest);text-align:center;line-height:1.3}
+  .seal-dot{width:8px;height:8px;border-radius:50%;background:var(--forest);margin:6px auto 0}
+  .seal.lg{width:160px;height:160px}
+  .seal.lg .seal-text{font-size:13px}
+  .seal.sm{width:90px;height:90px}
+  .seal.sm .seal-text{font-size:9px;letter-spacing:0.15em}
+
+  /* =========================================================
+     HERO
+     ========================================================= */
+  .hero{padding:140px 0 60px;position:relative;overflow:hidden}
+  .hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:60px}
+  .hero-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--forest);display:flex;align-items:center;gap:10px}
+  .hero-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--forest);display:inline-block}
+  .hero-meta{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--charcoal-light);text-align:right;line-height:1.6}
+  .hero-meta b{color:var(--forest);font-weight:500}
+
+  .hero-headline{position:relative;margin-bottom:40px;line-height:0.7}
+  .hero-headline .word-1{display:block;color:var(--butter-yellow)}
+  .hero-headline .word-2{display:block;color:var(--forest);text-align:right;font-style:italic;font-size:0.65em}
+  .hero-headline .word-3{display:block;color:var(--cream-teal);text-align:center;font-size:0.85em}
+
+  .hero-sub{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;margin-top:60px}
+  .hero-sub-text{font-size:18px;line-height:1.45;color:var(--charcoal);max-width:480px}
+  .hero-sub-text strong{font-weight:700;color:var(--forest)}
+  .hero-cta{display:flex;flex-direction:column;align-items:flex-end;gap:14px}
+
+  /* Three-product row preview */
+  .hero-products{display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp-20);margin-top:80px;padding-top:40px;border-top:1px solid var(--line)}
+
+  /* =========================================================
+     PRODUCT CARD — high-key white-bg product showcase
+     ========================================================= */
+  .product-card{position:relative;display:flex;flex-direction:column;gap:var(--sp-12);text-align:center;padding:var(--sp-20);transition:transform .3s ease}
+  .product-card:hover{transform:translateY(-4px)}
+  .product-photo{position:relative;aspect-ratio:1/1;background:var(--paper-off);border:1px solid var(--line);overflow:hidden;display:grid;place-items:center}
+  .product-photo .pizza-3d{width:80%;height:80%;background:radial-gradient(circle at 40% 35%,#f5e8c0 0%,#e8c89a 40%,#c9a878 80%);border-radius:50%;position:relative;box-shadow:inset 0 0 0 8px #c9a878}
+  .product-photo .pizza-3d::before{content:"";position:absolute;inset:14%;background:radial-gradient(circle,#8b1a10 30%,transparent 60%);border-radius:50%;opacity:0.6}
+  .product-photo .pizza-3d::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 70% 30%,rgba(255,255,255,0.3) 0%,transparent 30%)}
+  .product-tag{font-weight:500;font-size:14px;letter-spacing:var(--trk);text-transform:uppercase;color:var(--forest);margin-top:8px}
+  .product-caption{font-size:14px;line-height:1.5;letter-spacing:var(--trk);text-transform:uppercase;color:var(--charcoal);padding-top:var(--sp-20);font-weight:400}
+  .product-caption b{display:block;font-weight:500;color:var(--forest);margin-bottom:4px}
+
+  /* Per-pizza colors of the dough mockup */
+  .pc-pepperoni .pizza-3d{background:radial-gradient(circle at 40% 35%,#f5d0a0 0%,#d4986a 60%,#a06840 100%)}
+  .pc-pepperoni .pizza-3d::before{background:radial-gradient(circle,#8b2a1a 30%,transparent 50%);opacity:0.7}
+  .pc-bbq .pizza-3d{background:radial-gradient(circle at 40% 35%,#e8b870 0%,#b88040 60%,#7a4820 100%)}
+  .pc-bbq .pizza-3d::before{background:radial-gradient(circle,#6b3410 30%,transparent 60%);opacity:0.8}
+  .pc-caprese .pizza-3d{background:radial-gradient(circle at 40% 35%,#f0e8b8 0%,#c8b878 60%,#908850 100%)}
+  .pc-caprese .pizza-3d::before{background:radial-gradient(circle,#c4322a 30%,transparent 50%);opacity:0.5}
+  .pc-works .pizza-3d{background:radial-gradient(circle at 40% 35%,#e8c890 0%,#c89860 60%,#8a6030 100%)}
+  .pc-napolitana .pizza-3d{background:radial-gradient(circle at 40% 35%,#f5d8a8 0%,#d4a06a 60%,#9a6438 100%)}
+  .pc-napolitana .pizza-3d::before{background:radial-gradient(circle,#c4322a 30%,transparent 50%);opacity:0.55}
+  .pc-cordillerana .pizza-3d{background:radial-gradient(circle at 40% 35%,#e8d4a0 0%,#b89870 60%,#806040 100%)}
+  .pc-cordillerana .pizza-3d::before{background:radial-gradient(circle,#4a1a10 30%,transparent 50%);opacity:0.6}
+  .pc-vegetariana .pizza-3d{background:radial-gradient(circle at 40% 35%,#f0e8b0 0%,#c8b878 60%,#8a8050 100%)}
+  .pc-vegetariana .pizza-3d::before{background:radial-gradient(circle,#2a5a2a 40%,transparent 70%);opacity:0.4}
+
+  /* Section wrapper with massive type behind */
+  .section-billboard{position:relative;padding:120px 0;overflow:hidden;border-top:1px solid var(--line)}
+  .section-billboard .bg-type{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--sans);font-weight:900;line-height:0.7;letter-spacing:var(--trk);font-size:clamp(200px, 32vw, 480px);text-transform:uppercase;z-index:0;white-space:nowrap;color:var(--cream-teal)}
+  .section-billboard .bg-type.yellow{color:var(--butter-yellow)}
+  .section-billboard .bg-type.forest{color:var(--forest)}
+  .section-billboard .container{position:relative;z-index:1}
+
+  .sec-head{margin-bottom:60px;display:flex;justify-content:space-between;align-items:flex-end;gap:40px;flex-wrap:wrap}
+  .sec-head .left{max-width:600px}
+  .sec-head h2{font-family:var(--sans);font-weight:900;font-size:clamp(36px, 4.5vw, 64px);line-height:0.95;letter-spacing:var(--trk);color:var(--forest);text-transform:uppercase;margin-bottom:20px}
+  .sec-head p{font-size:16px;line-height:1.5;color:var(--charcoal);max-width:560px}
+  .sec-head .right{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--charcoal-light);text-align:right}
+  .sec-head .right b{color:var(--forest);font-weight:500}
+
+  /* =========================================================
+     THREE-PRODUCT ROW
+     ========================================================= */
+  .three-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp-20);margin-top:60px}
+  .three-row.two{grid-template-columns:1fr 1fr;max-width:920px;margin-left:auto;margin-right:auto}
+  .three-row .product-card{position:relative}
+
+  /* =========================================================
+     VISIBLE SYSTEM — colors, type, spacing
+     ========================================================= */
+  .system-section{background:var(--paper-off);padding:100px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .color-row{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-20);margin-top:40px}
+  .color-card{border:1px solid var(--line);background:var(--paper);padding:var(--sp-24)}
+  .color-swatch-big{height:160px;border:1px solid var(--line-dark);margin-bottom:20px;position:relative}
+  .color-meta .name{font-weight:500;font-size:14px;letter-spacing:var(--trk);text-transform:uppercase;color:var(--forest);margin-bottom:6px}
+  .color-meta .hex{font-family:var(--mono);font-size:12px;color:var(--charcoal);margin-bottom:4px}
+  .color-meta .role{font-size:13px;color:var(--charcoal-light);line-height:1.4}
+  .color-swatch-big .seal-stamp{position:absolute;top:14px;left:14px}
+
+  /* Type specimen */
+  .type-specimen{margin-top:60px;display:grid;grid-template-columns:1fr 1fr;gap:40px;border-top:1px solid var(--line);padding-top:40px}
+  .type-row{padding:30px 0;border-bottom:1px solid var(--line)}
+  .type-row .label{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--charcoal-light);margin-bottom:16px;display:flex;justify-content:space-between}
+  .type-row .label b{color:var(--forest);font-weight:500}
+  .type-row .specimen{font-family:var(--sans);font-weight:900;line-height:0.7;letter-spacing:var(--trk);color:var(--forest);font-size:clamp(120px, 16vw, 220px);text-transform:uppercase}
+  .type-row .specimen.thin{font-weight:400;font-size:clamp(28px, 4vw, 56px);line-height:1.05;color:var(--charcoal);text-transform:none}
+  .type-row .specimen.mono{font-family:var(--mono);font-weight:500;font-size:14px;letter-spacing:0.1em;text-transform:uppercase;line-height:1.5;color:var(--charcoal)}
+
+  /* =========================================================
+     STACK
+     ========================================================= */
+  .stack-section{background:var(--paper)}
+  .stack-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp-20);margin-top:40px}
+  .stack-card{padding:30px;border:1px solid var(--line);background:var(--paper);display:flex;flex-direction:column;gap:14px;min-height:240px;transition:all .25s ease}
+  .stack-card:hover{border-color:var(--forest);background:var(--paper-off)}
+  .stack-card .layer{font-family:var(--mono);font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--forest)}
+  .stack-card .name{font-family:var(--sans);font-weight:900;font-size:32px;line-height:0.95;letter-spacing:var(--trk);color:var(--charcoal);text-transform:uppercase}
+  .stack-card ul{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:auto}
+  .stack-card li{font-size:13px;color:var(--charcoal-light);display:flex;align-items:flex-start;gap:8px;line-height:1.4}
+  .stack-card li::before{content:"·";color:var(--forest);font-weight:700;margin-top:-2px}
+
+  /* =========================================================
+     UX FLOW — horizontal stages
+     ========================================================= */
+  .flow-section{background:var(--paper);padding:120px 0}
+  .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:60px;border-top:1px solid var(--line);padding-top:40px}
+  .flow-step{position:relative;padding:0 20px 0 0}
+  .flow-step::before{content:"";position:absolute;top:20px;left:0;right:0;height:1.5px;background:var(--forest)}
+  .flow-step:last-child::before{display:none}
+  .flow-num{width:40px;height:40px;border:1.5px solid var(--forest);border-radius:50%;background:var(--paper);display:grid;place-items:center;font-weight:500;font-size:14px;color:var(--forest);position:relative;z-index:1;margin-bottom:20px;letter-spacing:var(--trk)}
+  .flow-name{font-family:var(--sans);font-weight:700;font-size:24px;line-height:1.06;letter-spacing:var(--trk);color:var(--charcoal);text-transform:uppercase;margin-bottom:8px}
+  .flow-desc{font-size:14px;line-height:1.5;color:var(--charcoal-light)}
+
+  /* =========================================================
+     PERFORMANCE
+     ========================================================= */
+  .perf-section{background:var(--paper-off);padding:100px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .perf-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;margin-top:40px}
+  .perf-bars{display:flex;flex-direction:column;gap:20px}
+  .perf-bar{display:flex;flex-direction:column;gap:8px}
+  .perf-bar .top{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--charcoal);letter-spacing:0.05em;text-transform:uppercase}
+  .perf-bar .top b{color:var(--forest);font-weight:500}
+  .perf-bar .track{height:2px;background:var(--line-dark);position:relative}
+  .perf-bar .fill{position:absolute;left:0;top:0;height:2px;background:var(--forest);transition:width 1.5s ease-out}
+  .perf-list{display:flex;flex-direction:column;gap:16px}
+  .perf-item{padding:20px 24px;border:1px solid var(--line);background:var(--paper)}
+  .perf-item .k{font-family:var(--mono);font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--forest);margin-bottom:10px;font-weight:500}
+  .perf-item .v{font-size:14px;line-height:1.5;color:var(--charcoal-light)}
+
+  /* =========================================================
+     CODE BLOCK
+     ========================================================= */
+  .code-block{margin-top:60px;border:1px solid var(--charcoal);background:var(--paper);position:relative;overflow:hidden}
+  .code-head{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--charcoal-light);background:var(--paper-off)}
+  .code-head .left{display:flex;align-items:center;gap:14px}
+  .code-head .dots{display:flex;gap:6px}
+  .code-head .dots span{width:9px;height:9px;border-radius:50%;border:1px solid var(--line-dark)}
+  .code-body{padding:24px;font-family:var(--mono);font-size:12px;line-height:1.75;color:var(--charcoal);overflow-x:auto;max-height:480px;overflow-y:auto;background:var(--paper)}
+  .code-body pre{white-space:pre}
+  .tk{color:#035542;font-weight:500}.fn{color:#2b7bb9}.str{color:#5a5a56}.cm{color:#999;font-style:italic}.kw{color:#024235;font-weight:700}
+
+  /* =========================================================
+     FINAL CTA
+     ========================================================= */
+  .final-section{padding:160px 0 120px;text-align:center;position:relative;overflow:hidden;border-top:1px solid var(--line)}
+  .final-section .display{margin-bottom:40px;color:var(--butter-yellow)}
+  .final-section .display .it{color:var(--forest);font-style:italic;display:inline-block;margin:0 0.1em}
+  .final-sub{font-size:18px;line-height:1.5;color:var(--charcoal);max-width:520px;margin:0 auto 50px}
+  .final-cta{display:inline-flex;gap:14px}
+
+  /* =========================================================
+     FOOTER
+     ========================================================= */
+  footer{padding:80px 0 40px;border-top:1px solid var(--line);background:var(--paper)}
+  .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;align-items:start}
+  .footer-grid .brand-word{font-family:var(--sans);font-style:italic;font-weight:900;font-size:48px;color:var(--forest);line-height:1;letter-spacing:var(--trk);margin-bottom:6px}
+  .footer-grid .brand-sub{font-family:var(--sans);font-weight:500;font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:var(--forest);margin-bottom:24px}
+  .footer-grid p{font-size:14px;color:var(--charcoal-light);line-height:1.55;max-width:380px}
+  .footer-grid h4{font-family:var(--mono);font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--forest);margin-bottom:16px;font-weight:500}
+  .footer-grid ul{list-style:none;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--charcoal)}
+  .footer-credit{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--charcoal-light);margin-top:60px;padding-top:24px;border-top:1px solid var(--line)}
+
+  /* =========================================================
+     DIVIDER
+     ========================================================= */
+  .divider{height:1px;background:var(--line);width:100%}
+
+  /* =========================================================
+     COVERFLOW SLIDER
+     ========================================================= */
+  .cf-stage{position:relative;height:70vh;min-height:600px;overflow:hidden;perspective:1400px;user-select:none}
+  .cf-track{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100%;height:100%;transform-style:preserve-3d}
+  .cf-card{position:absolute;top:50%;left:50%;width:380px;height:520px;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.8,.2,1),opacity .5s ease,filter .5s ease;cursor:grab;will-change:transform}
+  .cf-card.dragging{cursor:grabbing;transition:none}
+  .cf-card-inner{position:relative;width:100%;height:100%;background:var(--paper);border:1.5px solid var(--line);border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
+  .cf-num{position:absolute;top:18px;left:18px;font-family:var(--mono);font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--charcoal-light);z-index:5}
+  .cf-num b{color:var(--forest);font-weight:500}
+  .cf-tag{position:absolute;top:18px;right:18px;font-family:var(--sans);font-weight:500;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--forest);padding:6px 12px;border:1.5px solid var(--forest);border-radius:100px;z-index:5;background:var(--paper)}
+  .cf-tag-featured{color:var(--butter-yellow);border-color:var(--butter-yellow);background:var(--forest)}
+  .cf-pizza{position:absolute;inset:30px 30px 200px 30px;display:grid;place-items:center;z-index:1}
+  .cf-pizza .pizza-3d{width:100%;height:100%}
+  .cf-shade{position:absolute;left:0;right:0;bottom:0;height:50%;background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,0.5) 50%,var(--paper) 100%);z-index:2;pointer-events:none}
+  .cf-content{position:absolute;left:0;right:0;bottom:0;padding:24px 28px 26px;z-index:3;background:linear-gradient(180deg,transparent 0%,var(--paper) 25%)}
+  .cf-name{font-family:var(--sans);font-weight:900;font-size:32px;line-height:0.95;letter-spacing:var(--trk);color:var(--forest);text-transform:uppercase;margin-bottom:8px}
+  .cf-name em{font-style:italic}
+  .cf-desc{font-size:13px;line-height:1.5;color:var(--charcoal-light);min-height:38px;margin-bottom:12px}
+  .cf-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .cf-price{font-family:var(--mono);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--charcoal-light)}
+  .cf-price b{color:var(--forest);font-weight:500;font-size:14px}
+  .cf-cta{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;font-family:var(--sans);font-weight:500;font-size:14px;color:var(--paper);background:var(--forest);border:1.5px solid var(--forest);border-radius:20px;cursor:pointer;transition:all .2s ease;letter-spacing:var(--trk)}
+  .cf-cta:hover{background:var(--forest-press);border-color:var(--forest-press)}
+  .cf-cta::after{content:"→";font-family:var(--sans);font-weight:400}
+
+  .cf-arrow{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border:1.5px solid var(--forest);background:rgba(255,255,255,0.9);backdrop-filter:blur(10px);border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:all .25s ease;z-index:15;color:var(--forest);font-family:var(--sans);font-size:20px;font-weight:400}
+  .cf-arrow:hover{background:var(--forest);color:var(--paper);transform:translateY(-50%) scale(1.05)}
+  .cf-arrow:disabled{opacity:0.3;cursor:not-allowed;transform:translateY(-50%)}
+  .cf-arrow:disabled:hover{background:rgba(255,255,255,0.9);color:var(--forest);transform:translateY(-50%)}
+  .cf-prev{left:32px}
+  .cf-next{right:32px}
+
+  .cf-controls{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:18px;z-index:20;background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);padding:9px 16px;border:1px solid var(--line);border-radius:100px}
+  .cf-play{width:32px;height:32px;border:1.5px solid var(--forest);background:var(--paper);border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:all .2s ease;color:var(--forest);font-size:11px}
+  .cf-play:hover{background:var(--forest);color:var(--paper)}
+  .cf-progress{width:180px;height:2px;background:var(--line-dark);position:relative;border-radius:2px;overflow:hidden}
+  .cf-progress-fill{position:absolute;left:0;top:0;height:100%;background:var(--forest);transition:width .5s cubic-bezier(.2,.8,.2,1);border-radius:2px;width:14.28%}
+  .cf-counter{font-family:var(--mono);font-size:11px;letter-spacing:0.15em;color:var(--charcoal);min-width:55px;text-align:center;text-transform:uppercase}
+  .cf-counter b{color:var(--forest);font-weight:500}
+
+  /* =========================================================
+     RESPONSIVE
+     ========================================================= */
+  @media(max-width:900px){
+    .container{padding:0 var(--sp-20)}
+    section{padding:60px 0}
+    .nav-right .nav-link{display:none}
+    .hero-headline .word-2{text-align:left}
+    .hero-sub{grid-template-columns:1fr;gap:30px}
+    .hero-cta{align-items:flex-start}
+    .hero-products{grid-template-columns:1fr 1fr}
+    .three-row{grid-template-columns:1fr;gap:40px}
+    .three-row.two{grid-template-columns:1fr}
+    .color-row{grid-template-columns:1fr}
+    .type-specimen{grid-template-columns:1fr}
+    .stack-grid{grid-template-columns:1fr}
+    .flow{grid-template-columns:1fr;gap:30px}
+    .flow-step::before{display:none}
+    .perf-grid{grid-template-columns:1fr;gap:30px}
+    .footer-grid{grid-template-columns:1fr;gap:30px}
+    .display{font-size:clamp(80px, 24vw, 180px)}
+    .sec-head{flex-direction:column;align-items:flex-start}
+    .sec-head .right{text-align:left}
+  }
+</style>
 </head>
 <body>
-  <canvas id="scene-canvas"></canvas>
-  <div class="paper-grid"></div>
 
-  <nav>
-    <div class="nav-brand">
-      <span class="word">Papa John's</span>
-      <span class="sub">AURUM · Live Prototype</span>
-    </div>
-    <div class="nav-right">
-      <a class="nav-link" href="#hero">Inicio</a>
-      <a class="nav-link" href="#chapter-1">Pizzas</a>
-      <a class="nav-link" href="#footer">Stack</a>
-      <a class="nav-menu" href="#">
-        <span>Menú</span>
-        <div class="nav-burger"><span></span><span></span><span></span></div>
-      </a>
-    </div>
-  </nav>
-
-  <div class="selector" id="selector"></div>
-  <div class="meta">
-    <b>SCROLL</b> · 0% · AURUM
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <span class="word">Papa John's</span>
+    <span class="sub">Propuesta AURUM · 2026</span>
   </div>
+  <div class="nav-right">
+    <a class="nav-link" href="#pepperoni">Pepperoni</a>
+    <a class="nav-link" href="#fresh">Fresh</a>
+    <a class="nav-link" href="#local">Local</a>
+    <a class="nav-link" href="#sistema">Sistema</a>
+    <a class="nav-link" href="#stack">Stack</a>
+    <a class="nav-link" href="#codigo">Código</a>
+    <a class="nav-menu" href="#">
+      <span>Menú</span>
+      <div class="nav-burger"><span></span><span></span><span></span></div>
+    </a>
+  </div>
+</nav>
 
-  <main class="scroll-layer">
-    <!-- HERO -->
-    <section class="section hero" id="hero">
+<main>
+
+  <!-- ============================================== HERO -->
+  <section class="hero container">
+    <div class="hero-top">
+      <div class="hero-eyebrow">
+        <span class="dot"></span>
+        <span>PROYECTO · 0001 · PAPA JOHN'S CHILE → AURUM</span>
+      </div>
+      <div class="hero-meta">
+        <div>2026 / Q3</div>
+        <div><b>EQUIPO SENIOR</b> · UX + DEV + BRAND + MOTION</div>
+      </div>
+    </div>
+
+    <div class="hero-headline">
+      <span class="word-1 display">PIZZA</span>
+      <span class="word-2 display">es silencio</span>
+      <span class="word-3 display">EN UN CORTE</span>
+    </div>
+
+    <div class="hero-sub">
+      <p class="hero-sub-text">
+        <strong>AURUM</strong> reimagina Papa John's como un <strong>cartel de producto fresco</strong>. Cada pizza se muestra como se merece: en un canvas blanco, con tipografía massive haciendo de arquitectura. Sin sombras. Sin gradientes. Solo la pizza, el tipo y un verde heritage.
+      </p>
+      <div class="hero-cta">
+        <a href="#pepperoni" class="btn lg">Ver el menú <span>→</span></a>
+        <a href="#codigo" class="btn blue">Saltar al código</a>
+      </div>
+    </div>
+
+    <!-- Hero product preview — three pizzas -->
+    <div class="hero-products">
+      <div class="product-card pc-pepperoni">
+        <div class="seal sm" style="position:absolute;top:10px;left:10px;z-index:2">
+          <div class="seal-text">FEATURED<br><div class="seal-dot"></div></div>
+        </div>
+        <div class="product-photo">
+          <div class="pizza-3d"></div>
+        </div>
+        <div class="product-tag">Super Pepperoni</div>
+        <div class="product-caption"><b>CLÁSICA</b>Carne · Cuchillo · Tiempo</div>
+      </div>
+      <div class="product-card pc-bbq">
+        <div class="product-photo">
+          <div class="pizza-3d"></div>
+        </div>
+        <div class="product-tag">Pollo BBQ</div>
+        <div class="product-caption"><b>AHUMADA</b>Queso que se estira</div>
+      </div>
+      <div class="product-card pc-napolitana">
+        <div class="product-photo">
+          <div class="pizza-3d"></div>
+        </div>
+        <div class="product-tag">Napolitana</div>
+        <div class="product-caption"><b>ITALIANA</b>Corte limpio · vapor</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== SECTION MENU: COVERFLOW SLIDER -->
+  <section id="menu" style="background:linear-gradient(180deg,var(--paper) 0%,var(--paper-off) 100%);padding:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);position:relative;overflow:hidden">
+    <div style="padding:60px 0 30px;text-align:center">
+      <div class="hero-eyebrow" style="justify-content:center">
+        <span class="dot"></span>
+        <span>ELIGE TU PIZZA · DRAG HORIZONTAL · SNAP POR CARD</span>
+      </div>
+      <h2 style="font-family:var(--sans);font-weight:900;font-size:clamp(36px, 5vw, 64px);line-height:0.95;letter-spacing:var(--trk);color:var(--forest);text-transform:uppercase;margin-top:20px">
+        Siete <em style="font-style:italic">escenas</em>,<br>una decisión.
+      </h2>
+    </div>
+
+    <div class="cf-stage">
+      <div class="cf-track" id="cf-track">
+
+        <div class="cf-card" data-index="0">
+          <div class="cf-card-inner">
+            <div class="cf-num"><b>01</b> / 07</div>
+            <div class="cf-tag">CLÁSICA</div>
+            <div class="cf-pizza pc-pepperoni"><div class="pizza-3d"></div></div>
+            <div class="cf-shade"></div>
+            <div class="cf-content">
+              <div class="cf-name">Super <em>Pepperoni</em></div>
+              <div class="cf-desc">Carne · Cuchillo · Tiempo. El clásico que nunca falla, animado en 3D.</div>
+              <div class="cf-bottom">
+                <div class="cf-price">CLP · <b>$9.990</b></div>
+                <button class="cf-cta">Ordenar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cf-card" data-index="1">
+          <div class="cf-card-inner">
+            <div class="cf-num"><b>02</b> / 07</div>
+            <div class="cf-tag">ITALIANA</div>
+            <div class="cf-pizza pc-napolitana"><div class="pizza-3d"></div></div>
+            <div class="cf-shade"></div>
+            <div class="cf-content">
+              <div class="cf-name">Napolitana</div>
+              <div class="cf-desc">Corte limpio, vapor sutil, brillo en el tomate. Italiana como debe ser.</div>
+              <div class="cf-bottom">
+                <div class="cf-price">CLP · <b>$8.990</b></div>
+                <button class="cf-cta">Ordenar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cf-card" data-index="2">
+          <div class="cf-card-inner">
+            <div class="cf-num"><b>03</b> / 07</div>
+            <div class="cf-tag">AHUMADA</div>
+            <div class="cf-pizza pc-bbq"><div class="pizza-3d"></div></div>
+            <div class="cf-shade"></div>
+            <div class="cf-content">
+              <div class="cf-name">Pollo <em>BBQ</em></div>
+              <div class="cf-desc">El queso se estira como el tiempo. Brillo especular sobre la salsa.</div>
+              <div class="cf-bottom">
+                <div class="cf-price">CLP · <b>$10.490</b></div>
+                <button class="cf-cta">Ordenar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cf-card" data-index="3">
+          <div class="cf-card-inner">
+            <div class="cf-num"><b>04</b> / 07</div>
+            <div class="cf-tag">FRESCA</div>
+            <div class="cf-pizza pc-caprese"><div class="pizza-3d"></div></div>
+            <div class="cf-shade"></div>
+            <div class="cf-content">
+              <div class="cf-name">Pollo <em>Caprese</em></div>
+              <div class="cf-desc">Albahaca que reacciona con cloth solver. La pizza que respira al cortar.</div>
+              <div class="cf-bottom">
+                <div class="cf-price">CLP · <b>$10.490</b></div>
+                <button class="cf-cta">Ordenar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cf-card" data-index="4">
+          <div class="cf-card-inner">
+            <div class="cf-num"><b>05</b> / 07</div>
+            <div class="cf-tag">XL</div>
+            <div class="cf-pizza pc-works"><div class="pizza-3d"></div></div>
+            <div class="cf-shade"></div>
+            <div class="cf-content">
+              <div class="cf-name">The <em>Works</em></div>
+              <div class="cf-desc">Ocho toppings reaccionando en cadena. La pizza más caótica de la casa.</div>
+              <div class="cf-bottom">
+                <div class="cf-price">CLP · <b>$12.990</b></div>
+                <button class="cf-cta">Ordenar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cf-card" data-index="5">
+          <div class="cf-card-inner">
+            <div class="cf-num"><b>06</b> / 07</div>
+            <div class="cf-tag cf-tag-featured">LOCAL ★</div>
+            <div class="cf-pizza pc-cordillerana"><div class="pizza-3d"></div></div>
+            <div class="cf-shade"></div>
+            <div class="cf-content">
+              <div class="cf-name">La <em>Cordillerana</em></div>
+              <div class="cf-desc">Polvo andino. Humo frío. Una pizza que cuenta un lugar.</div>
+              <div class="cf-bottom">
+                <div class="cf-price">CLP · <b>$11.490</b></div>
+                <button class="cf-cta">Ordenar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cf-card" data-index="6">
+          <div class="cf-card-inner">
+            <div class="cf-num"><b>07</b> / 07</div>
+            <div class="cf-tag">VERDE</div>
+            <div class="cf-pizza pc-vegetariana"><div class="pizza-3d"></div></div>
+            <div class="cf-shade"></div>
+            <div class="cf-content">
+              <div class="cf-name">Vege<em>tariana</em></div>
+              <div class="cf-desc">Verduras con rebote suave. Pimientos, champiñones y aceitunas.</div>
+              <div class="cf-bottom">
+                <div class="cf-price">CLP · <b>$9.490</b></div>
+                <button class="cf-cta">Ordenar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <button class="cf-arrow cf-prev" aria-label="Anterior">‹</button>
+      <button class="cf-arrow cf-next" aria-label="Siguiente">›</button>
+
+      <div class="cf-controls">
+        <button class="cf-play" aria-label="Auto-rotar">▶</button>
+        <div class="cf-progress"><div class="cf-progress-fill" id="cf-progress"></div></div>
+        <div class="cf-counter"><b id="cf-cur">01</b> / 07</div>
+      </div>
+    </div>
+
+    <div style="padding:30px 32px 50px;text-align:center">
+      <a href="slider.html" class="btn lg" style="border:1.5px solid var(--forest)">Ver versión 3D interactiva con Three.js <span>→</span></a>
+    </div>
+  </section>
+
+  <!-- ============================================== SECTION 1: PEPPERONI -->
+  <section id="pepperoni" class="section-billboard">
+    <span class="bg-type">PEPPERONI</span>
+    <div class="container">
+      <div class="sec-head">
+        <div class="left">
+          <h2>Carne. Cuchillo.<br>Tiempo.</h2>
+          <p>El cuchillo atraviesa lentamente. El pepperoni se desliza con física realista, el borde se curva como en una sola toma de estudio. La pizza como se merece: <strong>protagonista</strong>, no producto.</p>
+        </div>
+        <div class="right">
+          <div>SECCIÓN <b>01 / 03</b></div>
+          <div>3 PIZZAS · CLÁSICAS</div>
+        </div>
+      </div>
+
+      <div class="three-row">
+        <div class="product-card pc-pepperoni">
+          <div class="seal sm" style="position:absolute;top:10px;left:10px;z-index:2">
+            <div class="seal-text">FEATURED<br><div class="seal-dot"></div></div>
+          </div>
+          <div class="product-photo">
+            <div class="pizza-3d"></div>
+          </div>
+          <div class="product-tag">Super Pepperoni</div>
+          <div class="product-caption"><b>CLÁSICA</b>18 rodajas · borde curado</div>
+        </div>
+        <div class="product-card pc-works">
+          <div class="product-photo">
+            <div class="pizza-3d"></div>
+          </div>
+          <div class="product-tag">The Works</div>
+          <div class="product-caption"><b>XL</b>8 toppings · stagger caótico</div>
+        </div>
+        <div class="product-card pc-bbq">
+          <div class="product-photo">
+            <div class="pizza-3d"></div>
+          </div>
+          <div class="product-tag">Pollo BBQ</div>
+          <div class="product-caption"><b>AHUMADA</B>Queso viscoelástico</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== SECTION 2: FRESH -->
+  <section id="fresh" class="section-billboard">
+    <span class="bg-type yellow">FRESH</span>
+    <div class="container">
+      <div class="sec-head">
+        <div class="left">
+          <h2>Verde que<br>se corta fresco.</h2>
+          <p>Hojas de albahaca que reaccionan con simulación cloth. Tomates con shader gloss. Pimientos que rebotan con soft-body. La pizza <strong>respira</strong> cuando la cortas.</p>
+        </div>
+        <div class="right">
+          <div>SECCIÓN <b>02 / 03</b></div>
+          <div>3 PIZZAS · FRESCAS</div>
+        </div>
+      </div>
+
+      <div class="three-row">
+        <div class="product-card pc-napolitana">
+          <div class="seal sm" style="position:absolute;top:10px;left:10px;z-index:2">
+            <div class="seal-text">FRESH<br><div class="seal-dot"></div></div>
+          </div>
+          <div class="product-photo">
+            <div class="pizza-3d"></div>
+          </div>
+          <div class="product-tag">Napolitana</div>
+          <div class="product-caption"><b>ITALIANA</b>Vapor · brillo · corte limpio</div>
+        </div>
+        <div class="product-card pc-caprese">
+          <div class="product-photo">
+            <div class="pizza-3d"></div>
+          </div>
+          <div class="product-tag">Pollo Caprese</div>
+          <div class="product-caption"><b>FRESCA</b>Albahaca con cloth solver</div>
+        </div>
+        <div class="product-card pc-vegetariana">
+          <div class="product-photo">
+            <div class="pizza-3d"></div>
+          </div>
+          <div class="product-tag">Vegetariana</div>
+          <div class="product-caption"><b>VERDE</b>Verduras con soft-body</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== SECTION 3: LOCAL -->
+  <section id="local" class="section-billboard">
+    <span class="bg-type">ANDINA</span>
+    <div class="container">
+      <div class="sec-head">
+        <div class="left">
+          <h2>Polvo andino.<br>Humo frío.</h2>
+          <p>La Cordillera de los Andes cae sobre la pizza en partículas que respiran. Una pizza que cuenta un lugar — <strong>La Cordillerana</strong>, hecha en Chile para Chile.</p>
+        </div>
+        <div class="right">
+          <div>SECCIÓN <b>03 / 03</b></div>
+          <div>1 PIZZA · LOCAL</div>
+        </div>
+      </div>
+
+      <div class="three-row two">
+        <div class="product-card pc-cordillerana" style="position:relative">
+          <div class="seal lg" style="position:absolute;top:20px;left:20px;z-index:2">
+            <div class="seal-text">EDICIÓN<br>LOCAL<br><div class="seal-dot"></div></div>
+          </div>
+          <div class="product-photo">
+            <div class="pizza-3d"></div>
+          </div>
+          <div class="product-tag">La Cordillerana</div>
+          <div class="product-caption"><b>EDICIÓN ANDINA</b>Carne · cebolla · polvo frío</div>
+        </div>
+        <div style="display:flex;flex-direction:column;justify-content:center;gap:24px;padding:0 20px">
+          <p style="font-size:18px;line-height:1.5;color:var(--charcoal)">La pizza más cinematográfica del menú. No es solo un producto — es una <strong style="color:var(--forest)">declaración territorial</strong>.</p>
+          <p style="font-size:15px;line-height:1.55;color:var(--charcoal-light)">Sistema de partículas tipo polvo andino. Paleta desaturada con azules cálidos. Shaders de niebla procedural. Homenaje a quienes hornean pizza en la cordillera.</p>
+          <div>
+            <a class="btn" href="#">Ordenar · $11.490 <span>→</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== SISTEMA VISUAL -->
+  <section id="sistema" class="system-section">
+    <div class="container">
+      <div class="sec-head">
+        <div class="left">
+          <h2>Sistema<br>visual.</h2>
+          <p>Una sola familia tipográfica. Tres colores de display. Canvas blanco. Forest green como ancla interactiva. Sin sombras. Sin gradientes. Sin decoraciones.</p>
+        </div>
+        <div class="right">
+          <div>SECCIÓN <b>04 / 08</b></div>
+          <div>SISTEMA</div>
+        </div>
+      </div>
+
+      <div class="color-row">
+        <div class="color-card">
+          <div class="color-swatch-big" style="background:var(--forest)">
+            <div class="seal sm seal-stamp"><div class="seal-text" style="color:var(--paper)">AURUM<br><div class="seal-dot" style="background:var(--paper)"></div></div></div>
+          </div>
+          <div class="color-meta">
+            <div class="name">Forest Heritage</div>
+            <div class="hex">#035542</div>
+            <div class="role">Ancla interactiva · bordes, links, logo, sellos. <strong>Único color con función UI.</strong></div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch-big" style="background:var(--cream-teal)"></div>
+          <div class="color-meta">
+            <div class="name">Cream Teal</div>
+            <div class="hex">#56DDDB</div>
+            <div class="role">Display type para secciones frías · <strong>PEPPERONI, FRESH, ICE CREAM</strong>. Nunca bajo 290px.</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch-big" style="background:var(--butter-yellow)"></div>
+          <div class="color-meta">
+            <div class="name">Butter Yellow</div>
+            <div class="hex">#F9E9A9</div>
+            <div class="role">Display type alterno · <strong>FRESH, BUTTER, PANTRY</strong>. Solo a escala billboard.</div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch-big" style="background:var(--billboard-blue)"></div>
+          <div class="color-meta">
+            <div class="name">Billboard Blue</div>
+            <div class="hex">#2B7BB9</div>
+            <div class="role">Links secundarios · strokes decorativos en producto. <strong>Siempre outline, nunca fill.</strong></div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch-big" style="background:var(--charcoal)"></div>
+          <div class="color-meta">
+            <div class="name">Charcoal Press</div>
+            <div class="hex">#333333</div>
+            <div class="role">Texto principal · bordes de sistema · 644 usages detectados. <strong>El workhorse neutral.</strong></div>
+          </div>
+        </div>
+        <div class="color-card">
+          <div class="color-swatch-big" style="background:var(--paper);border:1px solid var(--line-dark)"></div>
+          <div class="color-meta">
+            <div class="name">Cream White Canvas</div>
+            <div class="hex">#FFFFFF</div>
+            <div class="role">Page background · canvas sin textura. <strong>Las pizzas y el tipo hacen todo el trabajo.</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Type specimen -->
+      <div class="type-specimen">
+        <div class="type-row">
+          <div class="label"><span>Display · Billboard</span><b>290–333PX · WEIGHT 900 · LH 0.70</b></div>
+          <div class="specimen">PIZZA</div>
+        </div>
+        <div class="type-row">
+          <div class="label"><span>Display · XL</span><b>420PX · WEIGHT 900 · LH 0.70</b></div>
+          <div class="specimen" style="font-size:clamp(120px, 14vw, 180px)">FRESH</div>
+        </div>
+        <div class="type-row" style="grid-column:1/-1">
+          <div class="label"><span>Subhead</span><b>40PX · WEIGHT 500</b></div>
+          <div class="specimen thin">Menos catálogo. Más cine.</div>
+        </div>
+        <div class="type-row" style="grid-column:1/-1">
+          <div class="label"><span>Mono · Meta</span><b>14PX · JETBRAINS MONO</b></div>
+          <div class="specimen mono">Sección 01 / 03 · 3 Pizzas · Clásicas</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== STACK -->
+  <section id="stack" class="stack-section container">
+    <div class="sec-head">
+      <div class="left">
+        <h2>Stack de<br>producción.</h2>
+        <p>Todo en torno a Three.js. WebGL2 + custom shaders. React para estado y composición. GSAP para scroll y timelines. Vite para build ultrarrápido.</p>
+      </div>
+      <div class="right">
+        <div>SECCIÓN <b>05 / 08</b></div>
+        <div>TECNOLOGÍA</div>
+      </div>
+    </div>
+
+    <div class="stack-grid">
+      <div class="stack-card">
+        <div class="layer">/ RENDER</div>
+        <div class="name">Three.js</div>
+        <ul>
+          <li>WebGL2 + GLSL shaders</li>
+          <li>Scene graph por pizza</li>
+          <li>PMREMGenerator para HDR</li>
+          <li>GLTFLoader para assets</li>
+        </ul>
+      </div>
+      <div class="stack-card">
+        <div class="layer">/ ESTADO</div>
+        <div class="name">React 18</div>
+        <ul>
+          <li>Vite como bundler</li>
+          <li>Zustand para cart</li>
+          <li>Suspense + lazy scenes</li>
+          <li>SSR opcional con Remix</li>
+        </ul>
+      </div>
+      <div class="stack-card">
+        <div class="layer">/ MOTION</div>
+        <div class="name">GSAP</div>
+        <ul>
+          <li>ScrollTrigger por pizza</li>
+          <li>Timeline chaining</li>
+          <li>SplitText para type</li>
+          <li>Physics2D plugin</li>
+        </ul>
+      </div>
+      <div class="stack-card">
+        <div class="layer">/ SHADERS</div>
+        <div class="name">GLSL Custom</div>
+        <ul>
+          <li>Cheese stretch shader</li>
+          <li>Sauce gloss reflection</li>
+          <li>Steam volumetric</li>
+          <li>GPU particle system</li>
+        </ul>
+      </div>
+      <div class="stack-card">
+        <div class="layer">/ FÍSICA</div>
+        <div class="name">Cannon-es</div>
+        <ul>
+          <li>Rigid body pepperoni</li>
+          <li>Soft body verduras</li>
+          <li>Cloth solver albahaca</li>
+          <li>Verlet integration</li>
+        </ul>
+      </div>
+      <div class="stack-card">
+        <div class="layer">/ AUDIO</div>
+        <div class="name">Tone.js</div>
+        <ul>
+          <li>Corte con reverb corto</li>
+          <li>Ambient drone low-pass</li>
+          <li>User-gesture opt-in</li>
+          <li>Mobile haptics</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== UX FLOW -->
+  <section class="flow-section">
+    <div class="container">
+      <div class="sec-head">
+        <div class="left">
+          <h2>Cinco actos.<br>Una compra.</h2>
+          <p>El journey sigue una narrativa de cartel. El usuario no "navega", atraviesa escenas. Cada transición está coreografiada.</p>
+        </div>
+        <div class="right">
+          <div>SECCIÓN <b>06 / 08</b></div>
+          <div>UX FLOW</div>
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-num">01</div>
+          <div class="flow-name">Aterrizaje</div>
+          <div class="flow-desc">Hero 100vh. Headline massive "PIZZA" en butter yellow. Tres productos destacados. CTA outlined.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">02</div>
+          <div class="flow-name">Recorrido</div>
+          <div class="flow-desc">Scroll vertical. Cada sección identificada por palabra massive. GSAP dispara animaciones.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">03</div>
+          <div class="flow-name">Interacción</div>
+          <div class="flow-desc">Hover activa microdetalles. Click & drag rota la pizza 360°. FEATURED seal en productos top.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">04</div>
+          <div class="flow-name">Selección</div>
+          <div class="flow-desc">Botón outlined abre configurador lateral. Tamaño, masa, extras. Live 3D preview.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">05</div>
+          <div class="flow-name">Checkout</div>
+          <div class="flow-desc">Modal estilo heritage. Dirección, pago, confirmación. 3 clicks. Sin fricción.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== PERFORMANCE -->
+  <section class="perf-section">
+    <div class="container">
+      <div class="sec-head">
+        <div class="left">
+          <h2>60fps.<br>Mobile included.</h2>
+          <p>La promesa no es solo visual. Es técnica. Cada escena se evalúa, se prioriza y se adapta al dispositivo sin sacrificar el aesthetic.</p>
+        </div>
+        <div class="right">
+          <div>SECCIÓN <b>07 / 08</b></div>
+          <div>PERFORMANCE</div>
+        </div>
+      </div>
+
+      <div class="perf-grid">
+        <div class="perf-bars">
+          <div class="perf-bar">
+            <div class="top"><span>First Contentful Paint</span><b>&lt; 1.2s</b></div>
+            <div class="track"><div class="fill" data-w="92%"></div></div>
+          </div>
+          <div class="perf-bar">
+            <div class="top"><span>Largest Contentful Paint</span><b>&lt; 2.4s</b></div>
+            <div class="track"><div class="fill" data-w="88%"></div></div>
+          </div>
+          <div class="perf-bar">
+            <div class="top"><span>Time to Interactive (3D)</span><b>&lt; 3.8s</b></div>
+            <div class="track"><div class="fill" data-w="78%"></div></div>
+          </div>
+          <div class="perf-bar">
+            <div class="top"><span>Frame Rate (desktop)</span><b>60 fps</b></div>
+            <div class="track"><div class="fill" data-w="100%"></div></div>
+          </div>
+          <div class="perf-bar">
+            <div class="top"><span>Frame Rate (mobile mid)</span><b>50–60 fps</b></div>
+            <div class="track"><div class="fill" data-w="85%"></div></div>
+          </div>
+          <div class="perf-bar">
+            <div class="top"><span>Total payload (compressed)</span><b>&lt; 2.8MB</b></div>
+            <div class="track"><div class="fill" data-w="72%"></div></div>
+          </div>
+        </div>
+        <div class="perf-list">
+          <div class="perf-item">
+            <div class="k">/ Lazy loading</div>
+            <div class="v">IntersectionObserver dispara la carga de cada escena 3D solo cuando está a 200px del viewport. Las 7 pizzas nunca cargan en simultáneo.</div>
+          </div>
+          <div class="perf-item">
+            <div class="k">/ LOD adaptativo</div>
+            <div class="v">Modelos en 3 niveles: high (desktop), mid (tablet), low (mobile). Swap basado en devicePixelRatio y memoria disponible.</div>
+          </div>
+          <div class="perf-item">
+            <div class="k">/ Instanced rendering</div>
+            <div class="v">Toppings repetidos (pepperoni, aceitunas) usan InstancedMesh. Una sola draw call para 50+ instancias.</div>
+          </div>
+          <div class="perf-item">
+            <div class="k">/ Pause when offscreen</div>
+            <div class="v">renderer.setAnimationLoop se pausa al cambiar de sección. requestVideoFrameCallback para sync con scroll.</div>
+          </div>
+          <div class="perf-item">
+            <div class="k">/ Preload + prefetch</div>
+            <div class="v">Hero preload completo. Siguiente pizza prefetch. CDN edge con HTTP/3 + Brotli.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== CÓDIGO -->
+  <section id="codigo" class="container">
+    <div class="sec-head">
+      <div class="left">
+        <h2>Código<br>ejemplo.</h2>
+        <p>Snippet real del componente PizzaScene con React + Three.js + GSAP. Composición modular, hooks reutilizables, shaders custom.</p>
+      </div>
+      <div class="right">
+        <div>SECCIÓN <b>08 / 08</b></div>
+        <div>IMPLEMENTACIÓN</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-head">
+        <div class="left">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <span>src/scenes/PizzaScene.jsx · React + Three.js + GSAP</span>
+        </div>
+        <span>178 lines</span>
+      </div>
+      <div class="code-body">
+<pre><span class="cm">// AURUM — PizzaScene component</span>
+<span class="cm">// Cada pizza hereda este wrapper. El comportamiento se customiza vía `config`.</span>
+
+<span class="kw">import</span> { useRef, useEffect, useMemo } <span class="kw">from</span> <span class="str">'react'</span>
+<span class="kw">import</span> * <span class="kw">as</span> THREE <span class="kw">from</span> <span class="str">'three'</span>
+<span class="kw">import</span> { gsap } <span class="kw">from</span> <span class="str">'gsap'</span>
+<span class="kw">import</span> { ScrollTrigger } <span class="kw">from</span> <span class="str">'gsap/ScrollTrigger'</span>
+<span class="kw">import</span> { useGLTF } <span class="kw">from</span> <span class="str">'@react-three/drei'</span>
+<span class="kw">import</span> { CheeseStretchMaterial } <span class="kw">from</span> <span class="str">'@/shaders/CheeseStretch'</span>
+<span class="kw">import</span> { SteamVolumetric } <span class="kw">from</span> <span class="str">'@/shaders/SteamVolumetric'</span>
+
+gsap.<span class="fn">registerPlugin</span>(ScrollTrigger)
+
+<span class="kw">export function</span> <span class="fn">PizzaScene</span>({ config, isActive }) {
+  <span class="kw">const</span> groupRef = <span class="fn">useRef</span>()
+  <span class="kw">const</span> meshRef = <span class="fn">useRef</span>()
+  <span class="kw">const</span> knifeRef = <span class="fn">useRef</span>()
+  <span class="kw">const</span> tlRef = <span class="fn">useRef</span>()
+
+  <span class="cm">// Carga lazy del modelo según pizza</span>
+  <span class="kw">const</span> { nodes } = <span class="fn">useGLTF</span>(<span class="str">`/models/${config.slug}.glb`</span>)
+
+  <span class="cm">// Timeline de animación — disparada por scroll</span>
+  <span class="fn">useEffect</span>(() => {
+    <span class="kw">if</span> (!groupRef.current || !meshRef.current) <span class="kw">return</span>
+
+    <span class="kw">const</span> tl = gsap.<span class="fn">timeline</span>({
+      scrollTrigger: {
+        trigger: groupRef.current.parentElement,
+        start: <span class="str">'top 60%'</span>,
+        end:   <span class="str">'bottom 20%'</span>,
+        scrub: <span class="str">1.2</span>,
+      }
+    })
+
+    <span class="cm">// Fase 1 — pizza aparece con stagger de toppings</span>
+    tl.<span class="fn">from</span>(groupRef.current.scale, {
+      x: <span class="str">0</span>, y: <span class="str">0</span>, z: <span class="str">0</span>,
+      duration: <span class="str">0.6</span>,
+      ease: <span class="str">'expo.out'</span>,
+    })
+
+    <span class="cm">// Fase 2 — cuchillo entra</span>
+    tl.<span class="fn">from</span>(knifeRef.current.position, {
+      y: <span class="str">2</span>,
+      duration: <span class="str">0.4</span>,
+      ease: <span class="str">'power3.in'</span>,
+    }, <span class="str">'+=0.1'</span>)
+
+    <span class="cm">// Fase 3 — corte (config.behavior define la animación específica)</span>
+    config.<span class="fn">behavior</span>({ mesh: meshRef.current, knife: knifeRef.current, tl })
+
+    <span class="cm">// Fase 4 — slice se separa</span>
+    tl.<span class="fn">to</span>(<span class="str">'.slice-group'</span>, {
+      y: <span class="str">0.3</span>,
+      rotationZ: <span class="str">0.15</span>,
+      duration: <span class="str">0.3</span>,
+      ease: <span class="str">'power2.out'</span>,
+    })
+
+    tlRef.current = tl
+    <span class="kw">return</span> () => tl.<span class="fn">kill</span>()
+  }, [config])
+
+  <span class="cm">// Hover — microinteracción de rotación</span>
+  <span class="kw">const</span> <span class="fn">handlePointerMove</span> = (e) => {
+    <span class="kw">const</span> { offsetX, offsetY } = e.nativeEvent
+    <span class="kw">const</span> rotY = (offsetX / window.innerWidth - <span class="str">0.5</span>) * <span class="str">0.6</span>
+    <span class="kw">const</span> rotX = (offsetY / window.innerHeight - <span class="str">0.5</span>) * <span class="str">0.3</span>
+    gsap.<span class="fn">to</span>(groupRef.current.rotation, {
+      y: rotY, x: rotX,
+      duration: <span class="str">0.8</span>,
+      ease: <span class="str">'power2.out'</span>,
+    })
+  }
+
+  <span class="kw">return</span> (
+    <span class="str">&lt;group ref={groupRef} onPointerMove={handlePointerMove}&gt;</span>
+      <span class="str">&lt;mesh ref={meshRef} geometry={doughGeometry} receiveShadow&gt;</span>
+        <span class="str">&lt;meshStandardMaterial color="#e8c89a" roughness={0.7} /&gt;</span>
+      <span class="str">&lt;/mesh&gt;</span>
+
+      <span class="str">&lt;mesh position={[0, 0.01, 0]}&gt;</span>
+        <span class="str">&lt;circleGeometry args={[1.15, 64]} /&gt;</span>
+        <span class="str">&lt;cheeseStretchMaterial uStretch={0.0} uTime={0} /&gt;</span>
+      <span class="str">&lt;/mesh&gt;</span>
+
+      <span class="str">{config.toppings.map((t, i) =&gt; (</span>
+        <span class="str">&lt;InstancedTopping key={i} {...t} count={t.count} /&gt;</span>
+      <span class="str">))}</span>
+
+      <span class="str">&lt;SteamVolumetric position={[0, 0.3, 0]} active={isActive} /&gt;</span>
+
+      <span class="str">&lt;group ref={knifeRef} position={[0, 0, 0]}&gt;</span>
+        <span class="str">&lt;mesh position={[0, 1.5, 0]}&gt;</span>
+          <span class="str">&lt;boxGeometry args={[0.04, 0.8, 0.18]} /&gt;</span>
+          <span class="str">&lt;meshStandardMaterial color="#d4d4d0" metalness={0.9} roughness={0.2} /&gt;</span>
+        <span class="str">&lt;/mesh&gt;</span>
+      <span class="str">&lt;/group&gt;</span>
+
+      <span class="str">&lt;spotLight position={[3, 5, 2]} angle={0.4} penumbra={0.6} intensity={2} color="#ffffff" /&gt;</span>
+      <span class="str">&lt;spotLight position={[-3, 3, -1]} angle={0.5} penumbra={0.8} intensity={0.8} color="#56dddb" /&gt;</span>
+      <span class="str">&lt;ambientLight intensity={0.4} /&gt;</span>
+    <span class="str">&lt;/group&gt;</span>
+  )
+}
+
+<span class="cm">// Behavior específico de cada pizza — inyecto en config</span>
+<span class="kw">export const</span> <span class="fn">pizzaBehaviors</span> = {
+  pepperoni: ({ mesh, knife, tl }) => {
+    tl.<span class="fn">to</span>(knife.position, { y: <span class="str">0</span>, duration: <span class="str">0.3</span> }, <span class="str">'cut'</span>)
+      .<span class="fn">call</span>(() => <span class="fn">spawnPepperoniPhysics</span>(mesh), [], <span class="str">'cut'</span>)
+  },
+  bbq: ({ tl }) => {
+    tl.<span class="fn">to</span>(<span class="str">'.cheese-material'</span>, { uStretch: <span class="str">1.0</span>, duration: <span class="str">0.4</span> })
+  },
+  <span class="cm">// ... napolitana, caprese, works, cordillerana, vegetariana</span>
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== FINAL -->
+  <section class="final-section">
+    <div class="container">
+      <div class="display">Menos <span class="it">catálogo.</span><br>Más billboard.</div>
+      <p class="final-sub">AURUM transforma cada pizza en un producto de cartel. El sitio deja de informar y empieza a seducir. Bienvenido al estudio.</p>
+      <div class="final-cta">
+        <a class="btn lg solid" href="#hero">Empezar desde arriba <span>↑</span></a>
+        <a class="btn lg" href="#stack">Ver stack <span>→</span></a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
       <div>
-        <div class="hero-eyebrow">
-          <span class="dot"></span>
-          <span>PROTOTIPO EN VIVO · PAPA JOHN'S CHILE → AURUM</span>
-        </div>
-        <h1>
-          <span class="w1 display">PIZZA</span>
-          <span class="w2 display">es silencio</span>
-          <span class="w3 display">en un corte</span>
-        </h1>
-        <p class="hero-sub">
-          Cada pizza es una <strong>escena 3D interactiva</strong> renderizada en tiempo real.
-          Scroll para recorrer el menú. El canvas es blanco — la pizza es la hero.
-        </p>
-        <div class="hero-cta">
-          <a href="#chapter-1" class="btn lg solid">Recorrer el menú <span>→</span></a>
-          <a href="#footer" class="btn lg blue">Ver stack</a>
-        </div>
+        <div class="brand-word">AURUM</div>
+        <div class="brand-sub">Propuesta · 2026</div>
+        <p>Concepto de rediseño para Papa John's Chile. Estética heritage billboard — la pizza es la hero, la tipografía es la arquitectura, el forest green es el ancla.</p>
       </div>
-      <div class="scroll-hint">SCROLL · DESCUBRE</div>
-    </section>
+      <div>
+        <h4>Equipo</h4>
+        <ul>
+          <li>UX/UI Designer</li>
+          <li>Creative Developer</li>
+          <li>Brand Strategist</li>
+          <li>Motion Designer 3D</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Stack</h4>
+        <ul>
+          <li>React 18 · Vite</li>
+          <li>Three.js · WebGL2</li>
+          <li>GSAP · ScrollTrigger</li>
+          <li>Cannon-es · Tone.js</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Entregables</h4>
+        <ul>
+          <li>Concepto creativo</li>
+          <li>Sistema visual</li>
+          <li>Wireframe + UX</li>
+          <li>Código + shaders</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-credit">© 2026 · AURUM · Entregado por el equipo senior · v0.3</div>
+  </div>
+</footer>
 
-    <!-- PIZZA CHAPTERS -->
-    <section class="chapter" id="chapter-1" data-pizza="0">
-      <span class="bg-word">PEPPERONI</span>
-      <div class="seal">
-        <div class="seal-text">FEATURED<br /><div class="seal-dot"></div></div>
-      </div>
-      <div class="content">
-        <div class="chapter-tag"><span class="dot"></span><span>PIZZA 01 · CLÁSICA</span></div>
-        <h2 class="chapter-name">Super <em>Pepperoni</em></h2>
-        <p class="chapter-desc">
-          El cuchillo atraviesa lentamente. El pepperoni se desliza con física realista,
-          el borde se curva como en una sola toma de estudio.
-        </p>
-        <div class="chapter-price">PRECIO · <b>$9.990 CLP</b></div>
-        <div style="margin-top:12px">
-          <a class="btn solid" href="#">Ordenar ahora <span>→</span></a>
-        </div>
-      </div>
-    </section>
+<script>
+  // Animate perf bars on scroll into view
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.fill').forEach(el => {
+          el.style.width = el.dataset.w
+        })
+      }
+    })
+  }, { threshold: 0.3 })
+  document.querySelectorAll('.perf-bars').forEach(el => observer.observe(el))
 
-    <section class="chapter" id="chapter-2" data-pizza="1">
-      <span class="bg-word yellow">FRESH</span>
-      <div class="content">
-        <div class="chapter-tag"><span class="dot"></span><span>PIZZA 02 · ITALIANA</span></div>
-        <h2 class="chapter-name">Napolitana</h2>
-        <p class="chapter-desc">
-          Corte limpio. Vapor sutil. Brillo en el tomate. La simplicidad como declaración editorial.
-        </p>
-        <div class="chapter-price">PRECIO · <b>$8.990 CLP</b></div>
-        <div style="margin-top:12px">
-          <a class="btn" href="#">Ordenar ahora <span>→</span></a>
-        </div>
-      </div>
-    </section>
+  // ============================================================
+  // COVERFLOW SLIDER — vanilla JS, no deps
+  // ============================================================
+  (function() {
+    const track = document.getElementById('cf-track')
+    if (!track) return
+    const cards = Array.from(track.querySelectorAll('.cf-card'))
+    const N = cards.length
+    const GAP = 420
+    const MAX = (N - 1) * GAP
+    let offset = 0
+    let activeIndex = 0
+    let isDragging = false
+    let startX = 0
+    let startOffset = 0
+    let velocity = 0
+    let lastT = 0
+    let autoRotate = null
+    let autoPaused = false
 
-    <section class="chapter" id="chapter-3" data-pizza="2">
-      <span class="bg-word">BBQ</span>
-      <div class="content">
-        <div class="chapter-tag"><span class="dot"></span><span>PIZZA 03 · AHUMADA</span></div>
-        <h2 class="chapter-name">Pollo <em>BBQ</em></h2>
-        <p class="chapter-desc">
-          El queso se estira como el tiempo. La salsa brilla con roughness animada.
-          El momento exacto antes de morder.
-        </p>
-        <div class="chapter-price">PRECIO · <b>$10.490 CLP</b></div>
-        <div style="margin-top:12px">
-          <a class="btn" href="#">Ordenar ahora <span>→</span></a>
-        </div>
-      </div>
-    </section>
+    function layout() {
+      cards.forEach((card, i) => {
+        const cardOff = i * GAP
+        const dist = cardOff - offset
+        const a = Math.abs(dist)
+        let x, z, rot, scale, op, blur
+        if (a < 60) {
+          x = 0; z = 0; rot = 0; scale = 1; op = 1; blur = 0
+        } else if (a < GAP * 0.6) {
+          const s = dist > 0 ? 1 : -1
+          const n = a / (GAP * 0.6)
+          x = s * (160 + n * 240); z = -n * 220; rot = -s * (12 + n * 18); scale = 0.88 - n * 0.1; op = 1 - n * 0.2; blur = 0
+        } else if (a < GAP * 1.3) {
+          const s = dist > 0 ? 1 : -1
+          const n = (a - GAP * 0.6) / (GAP * 0.7)
+          x = s * (400 + n * 200); z = -220 - n * 260; rot = -s * (30 + n * 20); scale = 0.76 - n * 0.08; op = 0.7 - n * 0.35; blur = n * 1.5
+        } else {
+          const s = dist > 0 ? 1 : -1
+          x = s * 700; z = -550; rot = -s * 55; scale = 0.62; op = 0; blur = 3
+        }
+        card.style.transform = `translate(-50%,-50%) translateX(${x}px) translateZ(${z}px) rotateY(${rot}deg) scale(${scale})`
+        card.style.opacity = op
+        card.style.filter = `blur(${blur}px)`
+        card.style.zIndex = Math.round(100 - a)
+      })
+      const newActive = Math.round(offset / GAP)
+      if (newActive !== activeIndex && newActive >= 0 && newActive < N) {
+        activeIndex = newActive
+        document.getElementById('cf-cur').textContent = String(activeIndex + 1).padStart(2, '0')
+        document.getElementById('cf-progress').style.width = ((offset / MAX) * 100) + '%'
+        document.querySelector('.cf-prev').disabled = activeIndex === 0
+        document.querySelector('.cf-next').disabled = activeIndex === N - 1
+      }
+    }
 
-    <section class="chapter" id="chapter-4" data-pizza="3">
-      <span class="bg-word yellow">CAPRESE</span>
-      <div class="content">
-        <div class="chapter-tag"><span class="dot"></span><span>PIZZA 04 · FRESCA</span></div>
-        <h2 class="chapter-name">Pollo <em>Caprese</em></h2>
-        <p class="chapter-desc">
-          Las hojas de albahaca reaccionan con simulación cloth. La pizza respira cuando la cortas.
-        </p>
-        <div class="chapter-price">PRECIO · <b>$10.490 CLP</b></div>
-        <div style="margin-top:12px">
-          <a class="btn" href="#">Ordenar ahora <span>→</span></a>
-        </div>
-      </div>
-    </section>
+    function loop() {
+      if (!isDragging) {
+        if (Math.abs(velocity) > 0.4) {
+          offset += velocity * 0.016
+          velocity *= 0.93
+        } else {
+          const target = Math.round(offset / GAP) * GAP
+          offset += (target - offset) * 0.13
+        }
+        if (offset < 0) { offset = 0; velocity = 0 }
+        if (offset > MAX) { offset = MAX; velocity = 0 }
+      }
+      layout()
+      requestAnimationFrame(loop)
+    }
+    loop()
 
-    <section class="chapter" id="chapter-5" data-pizza="4">
-      <span class="bg-word">WORKS</span>
-      <div class="content">
-        <div class="chapter-tag"><span class="dot"></span><span>PIZZA 05 · XL</span></div>
-        <h2 class="chapter-name">The <em>Works</em></h2>
-        <p class="chapter-desc">
-          Ocho toppings reaccionando en cadena. Stagger dinámico. La pizza más caótica de la casa.
-        </p>
-        <div class="chapter-price">PRECIO · <b>$12.990 CLP</b></div>
-        <div style="margin-top:12px">
-          <a class="btn" href="#">Ordenar ahora <span>→</span></a>
-        </div>
-      </div>
-    </section>
+    function getX(e) {
+      return e.touches ? e.touches[0].clientX : e.clientX
+    }
+    function onStart(e) {
+      if (e.target.closest('.cf-cta')) return
+      isDragging = true
+      autoPaused = true
+      startX = getX(e)
+      startOffset = offset
+      velocity = 0
+      lastT = performance.now()
+      cards.forEach(c => c.classList.add('dragging'))
+      e.preventDefault()
+    }
+    function onMove(e) {
+      if (!isDragging) return
+      const x = getX(e)
+      const dx = x - startX
+      const now = performance.now()
+      const dt = now - lastT
+      if (dt > 0) velocity = (dx / dt) * 16
+      offset = startOffset - dx
+      lastT = now
+      e.preventDefault()
+    }
+    function onEnd() {
+      if (!isDragging) return
+      isDragging = false
+      cards.forEach(c => c.classList.remove('dragging'))
+      setTimeout(() => { autoPaused = false }, 2500)
+    }
 
-    <section class="chapter" id="chapter-6" data-pizza="5">
-      <span class="bg-word yellow">ANDINA</span>
-      <div class="seal">
-        <div class="seal-text">LOCAL<br /><div class="seal-dot"></div></div>
-      </div>
-      <div class="content">
-        <div class="chapter-tag"><span class="dot"></span><span>PIZZA 06 · EDICIÓN ANDINA</span></div>
-        <h2 class="chapter-name">La <em>Cordillerana</em></h2>
-        <p class="chapter-desc">
-          Polvo andino. Humo frío. La Cordillera de los Andes cae sobre la pizza en partículas que respiran.
-        </p>
-        <div class="chapter-price">PRECIO · <b>$11.490 CLP</b></div>
-        <div style="margin-top:12px">
-          <a class="btn" href="#">Ordenar ahora <span>→</span></a>
-        </div>
-      </div>
-    </section>
+    const stage = track.parentElement
+    stage.addEventListener('mousedown', onStart)
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onEnd)
+    stage.addEventListener('touchstart', onStart, { passive: false })
+    window.addEventListener('touchmove', onMove, { passive: false })
+    window.addEventListener('touchend', onEnd)
 
-    <section class="chapter" id="chapter-7" data-pizza="6">
-      <span class="bg-word teal">VERDE</span>
-      <div class="content">
-        <div class="chapter-tag"><span class="dot"></span><span>PIZZA 07 · VEGETARIANA</span></div>
-        <h2 class="chapter-name">Vegetariana</h2>
-        <p class="chapter-desc">
-          Verduras que rebotan con gracia. Pimientos, champiñones y aceitunas en soft-body damping.
-          La quietud del color.
-        </p>
-        <div class="chapter-price">PRECIO · <b>$9.490 CLP</b></div>
-        <div style="margin-top:12px">
-          <a class="btn" href="#">Ordenar ahora <span>→</span></a>
-        </div>
-      </div>
-    </section>
+    function goTo(idx) {
+      if (idx < 0 || idx >= N) return
+      const target = idx * GAP
+      const start = offset
+      const dist = target - start
+      const dur = 600
+      const t0 = performance.now()
+      function step(now) {
+        const t = Math.min(1, (now - t0) / dur)
+        const e = 1 - Math.pow(1 - t, 3)
+        offset = start + dist * e
+        if (t < 1) requestAnimationFrame(step)
+      }
+      step(performance.now())
+    }
 
-    <!-- FOOTER -->
-    <footer id="footer">
-      <div class="footer-grid">
-        <div>
-          <div class="brand-word">AURUM</div>
-          <div class="brand-sub">Propuesta · 2026</div>
-          <p>
-            Prototipo en vivo de la propuesta de rediseño. Renderizado en tiempo real con
-            Three.js + shaders custom sobre canvas blanco. Forest green como ancla, tipografía
-            Work Sans 900 como arquitectura.
-          </p>
-        </div>
-        <div>
-          <h4>Stack</h4>
-          <ul>
-            <li>Three.js r165+</li>
-            <li>WebGL2 + GLSL</li>
-            <li>Custom shaders</li>
-            <li>InstancedMesh</li>
-          </ul>
-        </div>
-        <div>
-          <h4>Performance</h4>
-          <ul>
-            <li>60fps desktop</li>
-            <li>50–60fps mobile</li>
-            <li>LOD adaptativo</li>
-            <li>Lazy scenes</li>
-          </ul>
-        </div>
-        <div>
-          <h4>Entregable</h4>
-          <ul>
-            <li>Concepto creativo</li>
-            <li>Sistema visual</li>
-            <li>Wireframe + UX</li>
-            <li>Código + shaders</li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-credit">© 2026 · AURUM Prototype · Senior team · v0.3</div>
-    </footer>
-  </main>
+    document.querySelector('.cf-prev').addEventListener('click', () => { goTo(activeIndex - 1); autoPaused = true; setTimeout(() => autoPaused = false, 3000) })
+    document.querySelector('.cf-next').addEventListener('click', () => { goTo(activeIndex + 1); autoPaused = true; setTimeout(() => autoPaused = false, 3000) })
 
-  <script type="module" src="/src/main.js"></script>
+    const playBtn = document.querySelector('.cf-play')
+    playBtn.addEventListener('click', () => {
+      if (autoRotate) {
+        clearInterval(autoRotate); autoRotate = null; playBtn.textContent = '▶'
+      } else {
+        autoRotate = setInterval(() => { if (autoPaused) return; goTo((activeIndex + 1) % N) }, 4000)
+        playBtn.textContent = '❚❚'
+      }
+    })
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { goTo(activeIndex - 1); autoPaused = true; setTimeout(() => autoPaused = false, 3000) }
+      if (e.key === 'ArrowRight') { goTo(activeIndex + 1); autoPaused = true; setTimeout(() => autoPaused = false, 3000) }
+    })
+
+    layout()
+  })()
+</script>
+
 </body>
 </html>

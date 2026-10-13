@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AURUM — Live Prototype · Papa John's</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest: #035542;
+    --forest-press: #024235;
+    --billboard-blue: #2b7bb9;
+    --cream-teal: #56dddb;
+    --butter-yellow: #f9e9a9;
+    --charcoal: #333333;
+    --paper: #ffffff;
+    --paper-off: #fafaf7;
+    --line: #e8e6df;
+    --line-dark: #d4d2cb;
+    --sans: 'Work Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--paper);color:var(--charcoal);font-family:var(--sans);font-weight:400;letter-spacing:-0.0100em;-webkit-font-smoothing:antialiased;line-height:1.45}
+  body{overflow-x:hidden;cursor:default}
+
+  /* Canvas background for 3D scene */
+  #scene-canvas{position:fixed;inset:0;z-index:0;width:100%;height:100%;display:block;background:var(--paper)}
+  #scene-canvas canvas{width:100%!important;height:100%!important}
+
+  /* Subtle paper grid */
+  .paper-grid{position:fixed;inset:0;z-index:1;pointer-events:none;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:120px 120px;opacity:0.3;mask-image:radial-gradient(ellipse at center,#000 0%,transparent 80%)}
+
+  .scroll-layer{position:relative;z-index:2;pointer-events:none}
+  .scroll-layer *{pointer-events:auto}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:24px 32px;background:var(--paper);border-bottom:1px solid var(--line)}
+  .nav-brand{display:flex;flex-direction:column;line-height:1}
+  .nav-brand .word{font-family:var(--sans);font-style:italic;font-weight:900;font-size:30px;color:var(--forest);letter-spacing:-0.0100em}
+  .nav-brand .sub{font-family:var(--sans);font-weight:500;font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:var(--forest);margin-top:2px}
+  .nav-right{display:flex;align-items:center;gap:24px}
+  .nav-link{font-weight:500;font-size:17px;color:var(--forest);position:relative}
+  .nav-link::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:1.5px;background:var(--forest);transform:scaleX(0);transform-origin:right;transition:transform .3s ease}
+  .nav-link:hover::after{transform:scaleX(1);transform-origin:left}
+  .nav-menu{display:flex;align-items:center;gap:12px;font-weight:500;font-size:17px;color:var(--forest);cursor:pointer}
+  .nav-burger{width:24px;height:18px;display:flex;flex-direction:column;justify-content:space-between;padding:3px 0}
+  .nav-burger span{display:block;width:100%;height:3px;background:var(--forest)}
+
+  /* Sections */
+  .section{height:100vh;display:flex;align-items:center;justify-content:center;position:relative;padding:0 32px}
+  .hero{text-align:center;flex-direction:column;gap:40px}
+
+  .display{font-family:var(--sans);font-weight:900;line-height:0.7;letter-spacing:-0.0100em;font-size:clamp(140px, 22vw, 333px);text-transform:uppercase}
+  .hero h1 .w1{display:block;color:var(--butter-yellow)}
+  .hero h1 .w2{display:block;color:var(--forest);font-style:italic;font-size:0.65em;line-height:0.7}
+  .hero h1 .w3{display:block;color:var(--cream-teal);font-size:0.85em;line-height:0.7}
+
+  .hero-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--forest);display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:8px}
+  .hero-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--forest);display:inline-block}
+  .hero-sub{max-width:600px;margin:0 auto;font-size:18px;line-height:1.45;color:var(--charcoal)}
+  .hero-sub strong{color:var(--forest);font-weight:700}
+  .hero-cta{display:inline-flex;gap:14px;margin-top:24px}
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;font-family:var(--sans);font-weight:500;font-size:17px;line-height:1;letter-spacing:-0.0100em;background:transparent;color:var(--forest);border:1.5px solid var(--forest);border-radius:20px;transition:all .25s ease;cursor:pointer}
+  .btn:hover{background:var(--forest);color:var(--paper)}
+  .btn.solid{background:var(--forest);color:var(--paper)}
+  .btn.solid:hover{background:var(--forest-press);border-color:var(--forest-press)}
+  .btn.lg{padding:16px 32px;font-size:18px}
+  .btn.blue{color:var(--billboard-blue);border-color:var(--billboard-blue)}
+  .btn.blue:hover{background:var(--billboard-blue);color:var(--paper)}
+
+  .scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--charcoal);opacity:0.6;display:flex;flex-direction:column;align-items:center;gap:12px}
+  .scroll-hint::after{content:"";width:1px;height:40px;background:var(--forest);animation:scrollLine 2s ease-in-out infinite}
+  @keyframes scrollLine{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+  /* Chapter sections — billboard behind text */
+  .chapter{position:relative;height:100vh;display:grid;grid-template-columns:1fr;align-items:center;padding:0 60px;text-align:center;overflow:hidden}
+  .bg-word{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--sans);font-weight:900;line-height:0.7;letter-spacing:-0.0100em;font-size:clamp(180px, 28vw, 420px);text-transform:uppercase;color:var(--cream-teal);z-index:0;white-space:nowrap;pointer-events:none;user-select:none}
+  .bg-word.yellow{color:var(--butter-yellow)}
+  .bg-word.teal{color:var(--cream-teal)}
+  .bg-word.forest{color:var(--forest);opacity:0.15}
+  .chapter .content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:20px;max-width:680px;margin:0 auto}
+  .chapter-tag{font-family:var(--mono);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--forest);display:flex;align-items:center;gap:10px;justify-content:center}
+  .chapter-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--forest);display:inline-block}
+  .chapter-name{font-family:var(--sans);font-weight:900;font-size:clamp(48px, 7vw, 90px);line-height:0.95;letter-spacing:-0.0100em;color:var(--charcoal);text-transform:uppercase}
+  .chapter-name em{font-style:italic;color:var(--forest)}
+  .chapter-desc{font-size:18px;line-height:1.5;color:var(--charcoal);max-width:520px}
+  .chapter-price{font-family:var(--mono);font-size:14px;letter-spacing:0.1em;text-transform:uppercase;color:var(--charcoal);margin-top:8px}
+  .chapter-price b{color:var(--forest);font-weight:500}
+
+  /* FEATURED seal */
+  .seal{position:absolute;top:120px;right:60px;width:120px;height:120px;border:2px solid var(--forest);border-radius:50%;background:var(--paper);display:grid;place-items:center;z-index:3}
+  .seal-text{font-family:var(--sans);font-weight:500;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--forest);text-align:center;line-height:1.3}
+  .seal-dot{width:6px;height:6px;border-radius:50%;background:var(--forest);margin:6px auto 0}
+
+  /* Selector */
+  .selector{position:fixed;left:32px;top:50%;transform:translateY(-50%);z-index:30;display:flex;flex-direction:column;gap:14px}
+  .selector-item{width:10px;height:10px;border:1.5px solid var(--forest);background:transparent;cursor:pointer;transition:all .3s;border-radius:50%}
+  .selector-item.active{background:var(--forest);box-shadow:0 0 0 3px rgba(3,85,66,0.15)}
+  .selector-item:hover{background:var(--forest)}
+
+  /* Meta panel */
+  .meta{position:fixed;right:32px;top:50%;transform:translateY(-50%) rotate(180deg);z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--charcoal);text-align:right;line-height:1.8;writing-mode:vertical-rl}
+  .meta b{color:var(--forest);font-weight:500}
+
+  /* FOOTER */
+  footer{position:relative;z-index:2;padding:80px 32px 40px;background:var(--paper);border-top:1px solid var(--line)}
+  .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1400px;margin:0 auto;align-items:start}
+  .footer-grid .brand-word{font-family:var(--sans);font-style:italic;font-weight:900;font-size:48px;color:var(--forest);line-height:1;letter-spacing:-0.0100em;margin-bottom:6px}
+  .footer-grid .brand-sub{font-family:var(--sans);font-weight:500;font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:var(--forest);margin-bottom:24px}
+  .footer-grid p{font-size:14px;color:var(--charcoal);line-height:1.55;max-width:380px}
+  .footer-grid h4{font-family:var(--mono);font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--forest);margin-bottom:16px;font-weight:500}
+  .footer-grid ul{list-style:none;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--charcoal)}
+  .footer-credit{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--charcoal);margin-top:60px;padding-top:24px;border-top:1px solid var(--line);max-width:1400px;margin-left:auto;margin-right:auto}
+
+  /* RESPONSIVE */
+  @media(max-width:900px){
+    nav{padding:18px 20px}
+    .nav-right .nav-link{display:none}
+    .section{padding:0 20px}
+    .chapter{padding:0 20px}
+    .seal{position:relative;top:auto;right:auto;margin:0 auto 20px}
+    .footer-grid{grid-template-columns:1fr;gap:30px}
+    .selector{left:20px}
+    .meta{display:none}
+    .display{font-size:clamp(80px, 24vw, 180px)}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="scene-canvas"></canvas>
+<div class="paper-grid"></div>
+
+<nav>
+  <div class="nav-brand">
+    <span class="word">Papa John's</span>
+    <span class="sub">AURUM · Live Prototype</span>
+  </div>
+  <div class="nav-right">
+    <a class="nav-link" href="#hero">Inicio</a>
+    <a class="nav-link" href="#chapter-1">Pizzas</a>
+    <a class="nav-link" href="#footer">Stack</a>
+    <a class="nav-menu" href="#">
+      <span>Menú</span>
+      <div class="nav-burger"><span></span><span></span><span></span></div>
+    </a>
+  </div>
+</nav>
+
+<div class="selector" id="selector"></div>
+<div class="meta">
+  <b>SCROLL</b> · 0% · AURUM
+</div>
+
+<main class="scroll-layer">
+
+  <!-- HERO -->
+  <section class="section hero" id="hero">
+    <div>
+      <div class="hero-eyebrow">
+        <span class="dot"></span>
+        <span>PROTOTIPO EN VIVO · PAPA JOHN'S CHILE → AURUM</span>
+      </div>
+      <h1>
+        <span class="w1 display">PIZZA</span>
+        <span class="w2 display">es silencio</span>
+        <span class="w3 display">en un corte</span>
+      </h1>
+      <p class="hero-sub">
+        Cada pizza es una <strong>escena 3D interactiva</strong> renderizada en tiempo real. Scroll para recorrer el menú. El canvas es blanco — la pizza es la hero.
+      </p>
+      <div class="hero-cta">
+        <a href="#chapter-1" class="btn lg solid">Recorrer el menú <span>→</span></a>
+        <a href="#footer" class="btn lg blue">Ver stack</a>
+      </div>
+    </div>
+    <div class="scroll-hint">SCROLL · DESCUBRE</div>
+  </section>
+
+  <!-- PIZZA CHAPTERS — each with massive bg word -->
+  <section class="chapter" id="chapter-1" data-pizza="0">
+    <span class="bg-word">PEPPERONI</span>
+    <div class="seal"><div class="seal-text">FEATURED<br><div class="seal-dot"></div></div></div>
+    <div class="content">
+      <div class="chapter-tag"><span class="dot"></span><span>PIZZA 01 · CLÁSICA</span></div>
+      <h2 class="chapter-name">Super <em>Pepperoni</em></h2>
+      <p class="chapter-desc">El cuchillo atraviesa lentamente. El pepperoni se desliza con física realista, el borde se curva como en una sola toma de estudio.</p>
+      <div class="chapter-price">PRECIO · <b>$9.990 CLP</b></div>
+      <div style="margin-top:12px">
+        <a class="btn solid" href="#">Ordenar ahora <span>→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="chapter-2" data-pizza="1">
+    <span class="bg-word yellow">FRESH</span>
+    <div class="content">
+      <div class="chapter-tag"><span class="dot"></span><span>PIZZA 02 · ITALIANA</span></div>
+      <h2 class="chapter-name">Napolitana</h2>
+      <p class="chapter-desc">Corte limpio. Vapor sutil. Brillo en el tomate. La simplicidad como declaración editorial.</p>
+      <div class="chapter-price">PRECIO · <b>$8.990 CLP</b></div>
+      <div style="margin-top:12px">
+        <a class="btn" href="#">Ordenar ahora <span>→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="chapter-3" data-pizza="2">
+    <span class="bg-word">BBQ</span>
+    <div class="content">
+      <div class="chapter-tag"><span class="dot"></span><span>PIZZA 03 · AHUMADA</span></div>
+      <h2 class="chapter-name">Pollo <em>BBQ</em></h2>
+      <p class="chapter-desc">El queso se estira como el tiempo. La salsa brilla con roughness animada. El momento exacto antes de morder.</p>
+      <div class="chapter-price">PRECIO · <b>$10.490 CLP</b></div>
+      <div style="margin-top:12px">
+        <a class="btn" href="#">Ordenar ahora <span>→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="chapter-4" data-pizza="3">
+    <span class="bg-word yellow">CAPRESE</span>
+    <div class="content">
+      <div class="chapter-tag"><span class="dot"></span><span>PIZZA 04 · FRESCA</span></div>
+      <h2 class="chapter-name">Pollo <em>Caprese</em></h2>
+      <p class="chapter-desc">Las hojas de albahaca reaccionan con simulación cloth. La pizza respira cuando la cortas.</p>
+      <div class="chapter-price">PRECIO · <b>$10.490 CLP</b></div>
+      <div style="margin-top:12px">
+        <a class="btn" href="#">Ordenar ahora <span>→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="chapter-5" data-pizza="4">
+    <span class="bg-word">WORKS</span>
+    <div class="content">
+      <div class="chapter-tag"><span class="dot"></span><span>PIZZA 05 · XL</span></div>
+      <h2 class="chapter-name">The <em>Works</em></h2>
+      <p class="chapter-desc">Ocho toppings reaccionando en cadena. Stagger dinámico. La pizza más caótica de la casa.</p>
+      <div class="chapter-price">PRECIO · <b>$12.990 CLP</b></div>
+      <div style="margin-top:12px">
+        <a class="btn" href="#">Ordenar ahora <span>→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="chapter-6" data-pizza="5">
+    <span class="bg-word yellow">ANDINA</span>
+    <div class="seal"><div class="seal-text">LOCAL<br><div class="seal-dot"></div></div></div>
+    <div class="content">
+      <div class="chapter-tag"><span class="dot"></span><span>PIZZA 06 · EDICIÓN ANDINA</span></div>
+      <h2 class="chapter-name">La <em>Cordillerana</em></h2>
+      <p class="chapter-desc">Polvo andino. Humo frío. La Cordillera de los Andes cae sobre la pizza en partículas que respiran.</p>
+      <div class="chapter-price">PRECIO · <b>$11.490 CLP</b></div>
+      <div style="margin-top:12px">
+        <a class="btn" href="#">Ordenar ahora <span>→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="chapter" id="chapter-7" data-pizza="6">
+    <span class="bg-word teal">VERDE</span>
+    <div class="content">
+      <div class="chapter-tag"><span class="dot"></span><span>PIZZA 07 · VEGETARIANA</span></div>
+      <h2 class="chapter-name">Vegetariana</h2>
+      <p class="chapter-desc">Verduras que rebotan con gracia. Pimientos, champiñones y aceitunas en soft-body damping. La quietud del color.</p>
+      <div class="chapter-price">PRECIO · <b>$9.490 CLP</b></div>
+      <div style="margin-top:12px">
+        <a class="btn" href="#">Ordenar ahora <span>→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="footer">
+    <div class="footer-grid">
+      <div>
+        <div class="brand-word">AURUM</div>
+        <div class="brand-sub">Propuesta · 2026</div>
+        <p>Prototipo en vivo de la propuesta de rediseño. Renderizado en tiempo real con Three.js + shaders custom sobre canvas blanco. Forest green como ancla, tipografía Work Sans 900 como arquitectura.</p>
+      </div>
+      <div>
+        <h4>Stack</h4>
+        <ul>
+          <li>Three.js r165+</li>
+          <li>WebGL2 + GLSL</li>
+          <li>Custom shaders</li>
+          <li>InstancedMesh</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Performance</h4>
+        <ul>
+          <li>60fps desktop</li>
+          <li>50-60fps mobile</li>
+          <li>LOD adaptativo</li>
+          <li>Lazy scenes</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Entregable</h4>
+        <ul>
+          <li>Concepto creativo</li>
+          <li>Sistema visual</li>
+          <li>Wireframe + UX</li>
+          <li>Código + shaders</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-credit">© 2026 · AURUM Prototype · Senior team · v0.3</div>
+  </footer>
+
+</main>
+
+<!-- Three.js + GSAP from CDN -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.165.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.165.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// =============================================================
+// AURUM — Live Prototype (Hartzler-style heritage)
+// White canvas, forest green UI, billboard display type,
+// 3D pizzas as product photography.
+// =============================================================
+
+const canvas = document.getElementById('scene-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.setClearColor(0xffffff, 1); // White canvas
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffffff);
+
+const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.set(0, 1.6, 5.2);
+camera.lookAt(0, 0, 0);
+
+// ----- Lighting — bright high-key studio (product photography) -----
+const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambient);
+
+const key = new THREE.SpotLight(0xffffff, 4, 20, Math.PI / 5, 0.5, 1.5);
+key.position.set(3, 5, 3);
+key.castShadow = true;
+scene.add(key);
+
+const fill = new THREE.DirectionalLight(0xffffff, 1.2);
+fill.position.set(-3, 3, 1);
+scene.add(fill);
+
+const back = new THREE.PointLight(0xffffff, 1, 10, 2);
+back.position.set(0, 2, -3);
+scene.add(back);
+
+// ----- Floor disc (white) -----
+const floorGeo = new THREE.CircleGeometry(4, 64);
+const floorMat = new THREE.MeshStandardMaterial({
+  color: 0xffffff,
+  roughness: 0.5,
+  metalness: 0,
+});
+const floor = new THREE.Mesh(floorGeo, floorMat);
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = -0.5;
+scene.add(floor);
+
+// =============================================================
+// Pizza factory — high-key product photography style
+// =============================================================
+function makePizza(config) {
+  const group = new THREE.Group();
+  group.userData = { config, cutProgress: 0, sliceAngle: 0 };
+
+  // Dough — lighter color for product photo aesthetic
+  const doughGeo = new THREE.CylinderGeometry(config.radius, config.radius, 0.06, 64);
+  const doughMat = new THREE.MeshStandardMaterial({
+    color: 0xe8c89a,
+    roughness: 0.75,
+    metalness: 0,
+  });
+  const dough = new THREE.Mesh(doughGeo, doughMat);
+  dough.castShadow = true;
+  dough.receiveShadow = true;
+  group.add(dough);
+
+  // Crust ring
+  const crustGeo = new THREE.TorusGeometry(config.radius, 0.05, 16, 64);
+  const crustMat = new THREE.MeshStandardMaterial({ color: 0xc9a878, roughness: 0.9 });
+  const crust = new THREE.Mesh(crustGeo, crustMat);
+  crust.rotation.x = Math.PI / 2;
+  crust.position.y = 0.03;
+  group.add(crust);
+
+  // Sauce
+  const sauceGeo = new THREE.CircleGeometry(config.radius - 0.08, 64);
+  const sauceMat = new THREE.MeshStandardMaterial({
+    color: 0x8b1a10,
+    roughness: 0.5,
+    metalness: 0,
+  });
+  const sauce = new THREE.Mesh(sauceGeo, sauceMat);
+  sauce.rotation.x = -Math.PI / 2;
+  sauce.position.y = 0.031;
+  group.add(sauce);
+
+  // Cheese
+  const cheeseGeo = new THREE.CircleGeometry(config.radius - 0.12, 64);
+  const cheeseMat = new THREE.MeshStandardMaterial({
+    color: 0xf5e8c0,
+    roughness: 0.4,
+    metalness: 0.05,
+  });
+  const cheese = new THREE.Mesh(cheeseGeo, cheeseMat);
+  cheese.rotation.x = -Math.PI / 2;
+  cheese.position.y = 0.045;
+  group.add(cheese);
+
+  // Toppings
+  config.toppings.forEach(t => {
+    const tGeo = new THREE.SphereGeometry(t.size || 0.04, 12, 8);
+    if (t.shape === 'flat') tGeo.scale(1, 0.3, 1);
+    const tMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(t.color),
+      roughness: t.roughness ?? 0.6,
+      metalness: t.metalness ?? 0.1,
+    });
+    const inst = new THREE.InstancedMesh(tGeo, tMat, t.count);
+    const dummy = new THREE.Object3D();
+    let seed = t.count * 7919;
+    const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+    for (let i = 0; i < t.count; i++) {
+      const angle = rand() * Math.PI * 2;
+      const r = Math.sqrt(rand()) * (config.radius - 0.2);
+      dummy.position.set(Math.cos(angle) * r, 0.08 + (t.size || 0.04) * 0.5, Math.sin(angle) * r);
+      dummy.rotation.set(0, rand() * Math.PI * 2, 0);
+      const s = 0.8 + rand() * 0.4;
+      dummy.scale.set(s, s, s);
+      dummy.updateMatrix();
+      inst.setMatrixAt(i, dummy.matrix);
+    }
+    inst.instanceMatrix.needsUpdate = true;
+    inst.castShadow = true;
+    group.add(inst);
+  });
+
+  return group;
+}
+
+const PIZZAS = [
+  { name: 'Super Pepperoni', radius: 1.0, toppings: [{ count: 22, color: 0x8b2a1a, size: 0.07, roughness: 0.5 }] },
+  { name: 'Napolitana', radius: 1.0, toppings: [
+    { count: 10, color: 0xc4322a, size: 0.08, shape: 'flat', roughness: 0.4 },
+    { count: 8, color: 0x2d5a2a, size: 0.04, roughness: 0.7 },
+  ]},
+  { name: 'Pollo BBQ', radius: 1.0, toppings: [
+    { count: 16, color: 0x6b3410, size: 0.06, roughness: 0.7 },
+    { count: 12, color: 0xe8d4a0, size: 0.03, shape: 'flat', roughness: 0.4 },
+  ]},
+  { name: 'Pollo Caprese', radius: 1.0, toppings: [
+    { count: 14, color: 0x6b3410, size: 0.05, roughness: 0.6 },
+    { count: 8, color: 0xc4322a, size: 0.07, shape: 'flat' },
+    { count: 14, color: 0x2d5a2a, size: 0.04, roughness: 0.8 },
+  ]},
+  { name: 'The Works', radius: 1.1, toppings: [
+    { count: 14, color: 0x8b2a1a, size: 0.06, roughness: 0.5 },
+    { count: 10, color: 0x5a2818, size: 0.05, roughness: 0.7 },
+    { count: 12, color: 0xc9b890, size: 0.05, roughness: 0.6 },
+    { count: 20, color: 0x1a1a1a, size: 0.035, roughness: 0.4 },
+    { count: 14, color: 0x2a5a2a, size: 0.05, shape: 'flat' },
+    { count: 10, color: 0xe8d4a0, size: 0.035, shape: 'flat' },
+  ]},
+  { name: 'La Cordillerana', radius: 1.0, toppings: [
+    { count: 12, color: 0x4a1a10, size: 0.05, roughness: 0.6 },
+    { count: 10, color: 0xd4b890, size: 0.035, shape: 'flat', roughness: 0.5 },
+  ]},
+  { name: 'Vegetariana', radius: 1.0, toppings: [
+    { count: 16, color: 0xc9b890, size: 0.05, roughness: 0.6 },
+    { count: 14, color: 0x2a5a2a, size: 0.05, shape: 'flat' },
+    { count: 22, color: 0x1a1a1a, size: 0.035, roughness: 0.4 },
+    { count: 8, color: 0xc4322a, size: 0.07, shape: 'flat' },
+  ]},
+];
+
+const pizzaMeshes = PIZZAS.map(cfg => makePizza(cfg));
+const pizzaGroup = new THREE.Group();
+pizzaMeshes.forEach((p, i) => { p.position.x = i * 3.5; pizzaGroup.add(p); });
+scene.add(pizzaGroup);
+
+// Knife
+const knifeGroup = new THREE.Group();
+const bladeGeo = new THREE.BoxGeometry(0.04, 0.9, 0.18);
+const bladeMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d0, metalness: 0.95, roughness: 0.15 });
+const blade = new THREE.Mesh(bladeGeo, bladeMat);
+blade.position.y = 0;
+const tipGeo = new THREE.ConeGeometry(0.13, 0.5, 32);
+const tipMat = new THREE.MeshStandardMaterial({ color: 0xf0f0ec, metalness: 1, roughness: 0.1 });
+const tip = new THREE.Mesh(tipGeo, tipMat);
+tip.position.y = 0.6;
+const handleGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.5, 16);
+const handleMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.3, roughness: 0.7 });
+const handle = new THREE.Mesh(handleGeo, handleMat);
+handle.position.y = -0.7;
+knifeGroup.add(blade, tip, handle);
+knifeGroup.visible = false;
+scene.add(knifeGroup);
+
+// =============================================================
+// Scroll-driven camera
+// =============================================================
+let currentPizzaIndex = -1;
+const chapters = document.querySelectorAll('.chapter');
+
+function updateActiveChapter() {
+  const triggerY = window.innerHeight * 0.5;
+  let active = -1;
+  chapters.forEach((c, i) => {
+    const r = c.getBoundingClientRect();
+    if (r.top < triggerY && r.bottom > triggerY) {
+      active = i;
+      c.classList.add('in-view');
+    }
+  });
+  if (active !== currentPizzaIndex) {
+    currentPizzaIndex = active;
+    document.querySelectorAll('.selector-item').forEach((el, i) => {
+      el.classList.toggle('active', i === active);
+    });
+  }
+}
+
+const selector = document.getElementById('selector');
+chapters.forEach((c, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'selector-item';
+  dot.title = PIZZAS[i].name;
+  dot.addEventListener('click', () => c.scrollIntoView({ behavior: 'smooth' }));
+  selector.appendChild(dot);
+});
+
+window.addEventListener('scroll', updateActiveChapter, { passive: true });
+
+// =============================================================
+// Animation loop
+// =============================================================
+const clock = new THREE.Clock();
+
+function animate() {
+  const dt = clock.getDelta();
+  const t = clock.getElapsedTime();
+
+  const targetX = -currentPizzaIndex * 3.5;
+  pizzaGroup.position.x += (targetX - pizzaGroup.position.x) * 0.06;
+
+  pizzaMeshes.forEach((p, i) => {
+    if (i === currentPizzaIndex) {
+      p.rotation.y += dt * 0.15;
+      p.position.y = Math.sin(t * 1.2) * 0.05;
+    } else {
+      p.position.y = 0;
+    }
+  });
+
+  if (currentPizzaIndex >= 0) {
+    knifeGroup.visible = true;
+    const activePizza = pizzaMeshes[currentPizzaIndex];
+    const targetKnifeX = activePizza.position.x + pizzaGroup.position.x;
+    const chapterInView = chapters[currentPizzaIndex].getBoundingClientRect();
+    const inViewProgress = 1 - Math.abs((chapterInView.top + chapterInView.height/2 - window.innerHeight/2) / window.innerHeight);
+    const knifeY = 1.8 - inViewProgress * 2.0;
+    knifeGroup.position.set(targetKnifeX, Math.max(0.2, knifeY), 0);
+    knifeGroup.rotation.z = Math.sin(inViewProgress * Math.PI) * 0.2;
+  } else {
+    knifeGroup.visible = false;
+  }
+
+  camera.position.x = Math.sin(t * 0.3) * 0.05;
+  camera.position.y = 1.6 + Math.sin(t * 0.4) * 0.03;
+  camera.lookAt(0, 0, 0);
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+
+function onResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+window.addEventListener('resize', onResize);
+
+updateActiveChapter();
+animate();
+
+const chapterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in-view'); });
+}, { threshold: 0.3 });
+chapters.forEach(c => chapterObserver.observe(c));
+
+console.log('%cAURUM · Live Prototype', 'font: 16px sans-serif; color: #035542; font-weight: 900;');
+console.log('%cThree.js · WebGL2 · White canvas · Forest green UI', 'font: 11px monospace; color: #2b7bb9;');
+</script>
+
+</body>
+</html>
